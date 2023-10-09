@@ -370,7 +370,7 @@ function Elements() {
           </div>
         </div>
 
-        {!elements.length > 0 ? (
+        {elements.length > 0 ? (
           <TableList
             columns={columns}
             data={[]}

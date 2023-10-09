@@ -20,6 +20,8 @@ import {
   Form,
   FormFeedback,
 } from "reactstrap";
+import RadioField from "../../Components/Layouts/Fields/RadioField";
+import ToggleField from "../../Components/Layouts/Fields/ToggleField";
 
 function Elements() {
   const [elements, setElements] = useState([]);
@@ -116,6 +118,7 @@ function Elements() {
   const [isLoading, setIsLoading] = useState(true);
   const [IsError, setIsError] = useState(false);
   const [errorMsg, setErrorMsg] = useState(false);
+  const [currentTabPlane, setCurrentTabPlane] = useState(1);
 
   const resetFlag = () => {
     setIsSubmitted(false);
@@ -354,6 +357,11 @@ function Elements() {
     { label: "customers", value: "customers" },
   ];
 
+  const handleNextTabPlane = (id) => {
+    setCurrentTabPlane(id);
+    console.log(id, "CURRE_TAB__ID");
+  };
+
   return (
     <div className="elementspage">
       <div className="elementspage__container">
@@ -403,7 +411,7 @@ function Elements() {
       >
         <div className="modal__container">
           <div className="modal__head">
-            <img src="/static/icons/createc.png" alt="" />
+            <h4>Create Element</h4>
           </div>
 
           <Form
@@ -413,117 +421,216 @@ function Elements() {
               return false;
             }}
           >
-            <div className="row">
-              <div className="form__group">
-                <Label className="label"> Name</Label>
+            <div
+              className={`tabPlane ${currentTabPlane === 1 ? "active" : ""}`}
+            >
+              <div className="row">
+                <div className="form__group">
+                  <Label className="label"> Name</Label>
 
-                <input
-                  className="select"
-                  name="name"
-                  //   onChange={(e) =>
-                  //     validation.setFieldValue("industry", e.value)
-                  //   }
-                  placeholder="input name"
-                  //   value={industryOptions.find(
-                  //     (g) => g.value === validation.values.industry
-                  //   )}
-                  //   invalid={
-                  //     validation.touched.industry && validation.errors.industry
-                  //       ? true
-                  //       : false
-                  //   }
-                />
-              </div>
-              <div className="form__group">
-                <Label className="label">Element Classification</Label>
+                  <input
+                    className="select"
+                    name="name"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    placeholder="input name"
+                    //   value={industryOptions.find(
+                    //     (g) => g.value === validation.values.industry
+                    //   )}
+                    //   invalid={
+                    //     validation.touched.industry && validation.errors.industry
+                    //       ? true
+                    //       : false
+                    //   }
+                  />
+                </div>
+                <div className="form__group">
+                  <Label className="label">Element Classification</Label>
 
-                <Select
-                  className="select"
-                  name="classification"
-                  //   onChange={(e) =>
-                  //     validation.setFieldValue("industry", e.value)
-                  //   }
-                  options={[{ label: "one", value: "1", name: "e" }]}
-                  placeholder="select a classification..."
-                  id="classification-input"
-                />
-              </div>
-            </div>
-            <div className="row">
-              <div className="form__group">
-                <Label className="label">Element Category</Label>
-
-                <Select
-                  className="select"
-                  name="category"
-                  //   onChange={(e) =>
-                  //     validation.setFieldValue("industry", e.value)
-                  //   }
-                  options={[{ label: "one", value: "1", name: "e" }]}
-                  placeholder="select Element category..."
-                  id="category-input"
-                />
-              </div>
-              <div className="form__group">
-                <Label className="label">Element payrun</Label>
-
-                <Select
-                  className="select"
-                  name="payrun"
-                  //   onChange={(e) =>
-                  //     validation.setFieldValue("industry", e.value)
-                  //   }
-                  options={[{ label: "one", value: "1", name: "e" }]}
-                  placeholder="select Payrun..."
-                  id="payrun-input"
-                />
-              </div>
-            </div>
-            <div className="row no-grid">
-              <div className="form__group">
-                <Label className="label">Description</Label>
-
-                <textarea
-                  className="select"
-                  style={{ width: "100%", height: "10rem" }}
-                  name="description"
-                  //   onChange={(e) =>
-                  //     validation.setFieldValue("industry", e.value)
-                  //   }
-                  options={[{ label: "one", value: "1", name: "e" }]}
-                  placeholder="Input Description"
-                  id="description-input"
-                />
-              </div>
-            </div>
-            <div className="row no-grid">
-              <div className="form__group">
-                <Label className="label">Reporting Name</Label>
-
-                <textarea
-                  className="select"
-                  style={{ width: "100%", height: "10rem" }}
-                  name="reporting"
-                  //   onChange={(e) =>
-                  //     validation.setFieldValue("industry", e.value)
-                  //   }
-                  options={[{ label: "one", value: "1", name: "e" }]}
-                  placeholder="Input Reporting Name"
-                  id="Reporting-input"
-                />
-              </div>
-            </div>
-            <div className="row">
-              <div className="form__group">
-                <div
-                  onClick={() => setShowModal(false)}
-                  className="cancel-button"
-                >
-                  Cancel
+                  <Select
+                    className="select"
+                    name="classification"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    options={[{ label: "one", value: "1", name: "e" }]}
+                    placeholder="select a classification..."
+                    id="classification-input"
+                  />
                 </div>
               </div>
-              <div className="form__group">
-                <div className="next-button">Next</div>
+
+              <div className="row">
+                <div className="form__group">
+                  <Label className="label">Element Category</Label>
+
+                  <Select
+                    className="select"
+                    name="category"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    options={[{ label: "one", value: "1", name: "e" }]}
+                    placeholder="select Element category..."
+                    id="category-input"
+                  />
+                </div>
+                <div className="form__group">
+                  <Label className="label">Element payrun</Label>
+
+                  <Select
+                    className="select"
+                    name="payrun"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    options={[{ label: "one", value: "1", name: "e" }]}
+                    placeholder="select Payrun..."
+                    id="payrun-input"
+                  />
+                </div>
+              </div>
+              <div className="row no-grid">
+                <div className="form__group">
+                  <Label className="label">Description</Label>
+
+                  <textarea
+                    className="select"
+                    style={{ width: "100%", height: "10rem" }}
+                    name="description"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    options={[{ label: "one", value: "1", name: "e" }]}
+                    placeholder="Input Description"
+                    id="description-input"
+                  />
+                </div>
+              </div>
+              <div className="row no-grid">
+                <div className="form__group">
+                  <Label className="label">Reporting Name</Label>
+
+                  <textarea
+                    className="select"
+                    style={{ width: "100%", height: "10rem" }}
+                    name="reporting"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    options={[{ label: "one", value: "1", name: "e" }]}
+                    placeholder="Input Reporting Name"
+                    id="Reporting-input"
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="form__group">
+                  <div
+                    onClick={() => setShowModal(false)}
+                    className="cancel-button"
+                  >
+                    Cancel
+                  </div>
+                </div>
+                <div
+                  className="form__group"
+                  onClick={() => handleNextTabPlane(currentTabPlane + 1)}
+                >
+                  <div className="next-button">Next</div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={`tabPlane ${currentTabPlane === 2 ? "active" : ""}`}
+            >
+              <div className="row">
+                <div className="form__group">
+                  <Label className="label"> Effective start date</Label>
+
+                  <input
+                    className="select"
+                    name="name"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    placeholder="select date"
+                  />
+                </div>
+                <div className="form__group">
+                  <Label className="label"> Effective End date</Label>
+
+                  <Select
+                    className="select"
+                    name="classification"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    options={[{ label: "one", value: "1", name: "e" }]}
+                    placeholder="select a classification..."
+                    id="classification-input"
+                  />
+                </div>
+              </div>
+
+              <div className="row no-grid">
+                <div className="form__group">
+                  <Label className="label">Selected Pay Months</Label>
+
+                  <Select
+                    className="select"
+                    name="category"
+                    //   onChange={(e) =>
+                    //     validation.setFieldValue("industry", e.value)
+                    //   }
+                    options={[{ label: "one", value: "1", name: "e" }]}
+                    placeholder="Select"
+                    id="category-input"
+                  />
+                </div>
+              </div>
+
+              <div className="row">
+                <RadioField
+                  label="Proccessing Type"
+                  firstRadioName="Open"
+                  secondRadioName="Closed"
+                />
+
+                <RadioField
+                  label="Pay Frequency"
+                  firstRadioName="Monthly"
+                  secondRadioName="Selected Months"
+                />
+              </div>
+
+              <div className="row">
+                <RadioField
+                  label="Prorate"
+                  firstRadioName="Yes"
+                  secondRadioName="No"
+                />
+
+                <ToggleField />
+              </div>
+
+              <div className="row">
+                <div className="form__group">
+                  <div
+                    onClick={() => setShowModal(false)}
+                    className="cancel-button"
+                  >
+                    Cancel
+                  </div>
+                </div>
+                <div
+                  className="form__group"
+                  onClick={() => handleNextTabPlane(currentTabPlane + 1)}
+                >
+                  <div className="next-button">Next</div>
+                </div>
               </div>
             </div>
           </Form>

@@ -1,0 +1,18 @@
+.search{
+    height: 100%;
+    display: flex;
+
+    img{
+        width: 4rem;
+    }
+
+    input{
+        padding: .8rem;
+
+        // background: linear-gradient(0deg, #DFDFDF, #DFDFDF),
+        //         linear-gradient(0deg, #FFFFFF, #FFFFFF);
+
+                border: 1px solid rgba(223, 223, 223, 1)
+    }
+ 
+}

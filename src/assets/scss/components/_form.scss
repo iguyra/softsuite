@@ -1,0 +1,52 @@
+.form {
+
+
+    &__group {
+        display: flex;
+        flex-direction: column;
+
+        .select, label{
+            font-size: 1.4rem;
+            font-family: Gilroy;
+            font-size: 14px;
+                line-height: 17px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: rgba(129, 141, 169, 1);
+        }
+
+        input{
+            // width: 100%;
+            padding: 1.5rem ;
+
+
+            
+        }
+    }
+}
+
+ 
+
+ textarea,input {
+    outline: none;
+    border: none;
+    border: 1px solid rgba(229, 229, 229, 1);
+
+    
+ }
+
+ textarea::placeholder, input::placeholder{
+font-family: Gilroy;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 19px;
+    letter-spacing: 0em;
+    text-align: left;
+    color:  rgba(129, 141, 169, 1);;
+ }
+ 
+  textarea::placeholder{
+    position: absolute;
+    top: 10%;
+    left: 2%;
+  }

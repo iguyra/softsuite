@@ -36,30 +36,27 @@ function Elements() {
     useState(true);
   const [payRunOptions, setPayRunOptions] = useState([]);
 
-  console.log(element, "ELSS");
-
-  const { control, register, handleSubmit, formState, setValue, watch } =
-    useForm({
-      defaultValues: {
-        name: element?.name,
-        description: element?.description,
-        payRunId: element?.payRunId,
-        payRunValueId: element?.payRunValueId,
-        classificationId: element?.classificationId,
-        classificationValueId: element?.classificationValueId,
-        categoryId: element?.categoryId,
-        categoryValueId: element?.categoryValueId,
-        reportingName: element?.reportingName,
-        processingType: element?.processingType,
-        status: "active",
-        prorate: element?.prorate,
-        effectiveStartDate: element?.effectiveStartDate,
-        effectiveEndDate: element?.effectiveEndDate,
-        selectedMonths: [],
-        payFrequency: element?.payFrequency,
-        modifiedBy: "Preston A.",
-      },
-    });
+  const { register, handleSubmit, formState, setValue, watch } = useForm({
+    defaultValues: {
+      name: element?.name,
+      description: element?.description,
+      payRunId: element?.payRunId,
+      payRunValueId: element?.payRunValueId,
+      classificationId: element?.classificationId,
+      classificationValueId: element?.classificationValueId,
+      categoryId: element?.categoryId,
+      categoryValueId: element?.categoryValueId,
+      reportingName: element?.reportingName,
+      processingType: element?.processingType,
+      status: "active",
+      prorate: element?.prorate,
+      effectiveStartDate: element?.effectiveStartDate,
+      effectiveEndDate: element?.effectiveEndDate,
+      selectedMonths: [],
+      payFrequency: element?.payFrequency,
+      modifiedBy: "Preston A.",
+    },
+  });
 
   const watchedClassificationValueId = watch("classificationValueId");
   const watchedPayFrequency = watch("payFrequency");
@@ -237,8 +234,14 @@ function Elements() {
 
   const onClickDelete = async (p) => {
     setElement(p);
-    let res = await new makeApiCall().delete(`elements/${p.id}`);
-    setIsDeleted(true);
+    setIsLoading(true);
+    try {
+      await new makeApiCall().delete(`elements/${p.id}`);
+      setIsDeleted(true);
+      setIsLoading(false);
+    } catch (err) {
+      setIsLoading(false);
+    }
   };
 
   function handleError(err) {
@@ -289,8 +292,6 @@ function Elements() {
       }
     }
   };
-
-  console.log(isUpdate, "IsUpdate");
 
   // Column
   const columns = useMemo(
@@ -407,6 +408,7 @@ function Elements() {
             </div>
           </div>
         )}
+        <p className="isLoading">{isLoading ? "Please wait" : ""}</p>
       </div>
 
       <div

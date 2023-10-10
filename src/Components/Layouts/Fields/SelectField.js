@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import Select from "react-select";
+import React from "react";
 
 import { Label } from "reactstrap";
 
@@ -12,13 +11,16 @@ function SelectField(props) {
         disabled={props.disabled}
         className="select"
         name={props.name}
-        // options={[{ label: "one", value: "1", name: "e" }]}
         placeholder={props.placeholder}
         {...props.register}
         multiple={props.isMulti}
       >
-        {props.options.map((item) => {
-          return <option value={+item.value}>{item.name}</option>;
+        {props.options.map((item, i) => {
+          return (
+            <option key={i} value={+item.value}>
+              {item.name}
+            </option>
+          );
         })}
       </select>
       {props.errors && props.errors[props.name] ? (

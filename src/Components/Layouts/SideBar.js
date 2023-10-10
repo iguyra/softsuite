@@ -74,7 +74,7 @@ const sidebarData = [
   {
     id: "elements-setup",
     label: "Elements Setup",
-    icon: "/settings.png",
+    icon: "/settings1.png",
     chevron: "/Iconly.png",
     link: "/#",
 
@@ -211,15 +211,35 @@ function SideBar() {
           return (
             <div key={i} className="sidebar__itemcontainer">
               {item.chevron ? (
-                <div className="sidebar__item">
+                <div
+                  // className="sidebar__item"
+                  className={
+                    item.id === activeMenuId && activeMenu
+                      ? "sidebar__item active"
+                      : "sidebar__item "
+                  }
+                >
                   <img src={item.icon} alt="" />
 
                   <p onClick={() => handleNavClick(item)}>{item.label}</p>
 
-                  {item.chevron ? <img src="/Iconly.png" alt="" /> : null}
+                  {item.id === activeMenuId && activeMenu ? (
+                    <img src="/arrow-down.png" alt="" />
+                  ) : (
+                    <img src="/Iconly.png" alt="" />
+                  )}
+
+                  {/* {item.chevron ? <img src="/Iconly.png" alt="" /> : null} */}
                 </div>
               ) : (
-                <div className="sidebar__item">
+                <div
+                  // className="sidebar__item "
+                  className={
+                    item.id === activeMenuId && activeMenu
+                      ? "sidebar__item active"
+                      : "sidebar__item "
+                  }
+                >
                   <img src={item.icon} alt="" />
 
                   <p onClick={() => handleNavClick(item)}>{item.label}</p>

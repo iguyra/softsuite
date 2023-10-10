@@ -113,123 +113,52 @@ function Elements() {
   }, [watchedCategoryValueId]);
 
   useEffect(() => {
+    if (!api) return;
+
     const fetchElements = async () => {
       setIsLoading(true);
 
-      if (!api) return;
-
       try {
-        // const api = new makeApiCall();
-
         let data = await api.get(`elements`);
         let elements = data.data.content.filter(
           (item) => item.modifiedBy === "Preston A."
         );
 
-        // Parallelize API calls using Promise.all()
-        // const categoryValuePromises = elements.map(async (item) => {
-        //   let data = await api.get(
+        // const categoryValuePromises = elements.map((item) =>
+        //   api.get(
         //     `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
-        //   );
-        //   item.categoryValueId = data.name;
-        //   return item;
-        // });
-
-        // const classificationValuePromises = elements.map(async (item) => {
-        //   let data = await api.get(
+        //   )
+        // );
+        // const classificationValuePromises = elements.map((item) =>
+        //   api.get(
         //     `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
-        //   );
-        //   item.classificationValueId = data.name;
+        //   )
+        // );
+
+        // // Wait for all categoryValueId and classificationValueId API calls to complete
+        // const [categoryValues, classificationValues] = await Promise.all([
+        //   Promise.all(categoryValuePromises),
+        //   Promise.all(classificationValuePromises),
+        // ]);
+
+        // console.log(categoryValues, classificationValues, "SLSLSLLSL");
+
+        // // Process responses and update elements
+        // elements = elements.map((item, index) => {
+        //   item.categoryValueId = categoryValues[index].name;
+        //   item.classificationValueId = classificationValues[index].name;
         //   return item;
         // });
-
-        // // Wait for all API calls to complete using Promise.all()
-        // elements = await Promise.all([
-        //   ...categoryValuePromises,
-        //   ...classificationValuePromises,
-        // ]);
 
         setElementList(elements);
         setIsLoading(false);
       } catch (error) {
-        // Handle errors here
-        console.error("Error fetching elements:", error);
         setIsLoading(false);
       }
     };
 
     fetchElements();
   }, [isDeleted, isAdded, api]);
-
-  // useEffect(() => {
-  //   const fetchElements = async () => {
-  //     setIsLoading(true);
-  //     let api = new makeApiCall();
-
-  //     let data = await api.get(`elements`);
-  //     let elements = data.data.content.filter((item) => {
-  //       return item.modifiedBy === "Preston A.";
-  //     });
-
-  //     // let category_lookup = await api.get(
-  //     //   `lookups/${item.categoryId}/lookupvalues/`
-  //     // );
-
-  //     // console.log(category_lookup, "category__VALUES");
-
-  //     // elements = await Promise.all(
-  //     //   elements.map(async (item) => {
-  //     //     let data = await api.get(
-  //     //       `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
-  //     //     );
-
-  //     //     item.classificationValueId = data.name;
-  //     //     return item;
-  //     //   })
-  //     // );
-
-  //     setElementList(elements);
-  //     setIsLoading(false);
-  //   };
-  //   fetchElements();
-  // }, [isDeleted, isAdded]);
-
-  // useEffect(() => {
-  //   const fetchElements = async () => {
-  //     setIsLoading(true);
-
-  //     let data = await new makeApiCall().get(`elements`);
-  //     let elements = data.data.content.filter((item) => {
-  //       return item.modifiedBy === "Preston A.";
-  //     });
-
-  //     elements = await Promise.all(
-  //       elements.map(async (item) => {
-  //         let data = await new makeApiCall().get(
-  //           `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
-  //         );
-
-  //         item.categoryValueId = data.name;
-  //         return item;
-  //       })
-  //     );
-
-  //     elements = await Promise.all(
-  //       elements.map(async (item) => {
-  //         let data = await new makeApiCall().get(
-  //           `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
-  //         );
-
-  //         item.classificationValueId = data.name;
-  //         return item;
-  //       })
-  //     );
-
-  //     setElementList(elements);
-  //     setIsLoading(false);
-  //   };
-  //   fetchElements();
-  // }, [isDeleted, isAdded]);
 
   useEffect(() => {
     if (watchedPayFrequency === "Selected Months") {
@@ -255,13 +184,12 @@ function Elements() {
   }, [watchedPayRunValueId, api]);
 
   useEffect(() => {
-    if (!api) return;
+    if (!api || !watchedClassificationValueId) return;
 
     let fetchlookupvalues = async () => {
       let data = await api.get(
         `lookups/2/lookupvalues/${+watchedClassificationValueId}`
       );
-      console.log(data, "FIRST_LOOKUP");
 
       let data_2 = await api.get(`lookups/1/lookupvalues`);
 
@@ -279,7 +207,6 @@ function Elements() {
           item.name.includes(lookupName)
         );
       }
-      console.log(categoryOptions, "categoryOptions===");
 
       categoryOptions = categoryOptions.map((item) => {
         return { name: item.name, value: +item.id, ...item };
@@ -289,6 +216,10 @@ function Elements() {
     };
 
     if (watchedClassificationValueId) {
+      console.log(
+        watchedClassificationValueId,
+        "watchedClassificationValueId>>"
+      );
       fetchlookupvalues();
     }
   }, [watchedClassificationValueId, api]);

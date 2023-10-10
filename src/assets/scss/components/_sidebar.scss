@@ -75,6 +75,24 @@
         transition: all .25s ;
         padding: .5rem;
 
+
+        &.active {
+            background-color: green;
+            background: rgba(75, 170, 121, 1);
+            color: white;
+
+            p{
+                //styleName: Special Link;
+                    font-family: Poppins;
+                    font-size: 14px;
+                    font-weight: 500;
+                    line-height: 21px;
+                    letter-spacing: 0em;
+                    text-align: left;
+                    color:  rgba(255, 255, 255, 1);;
+            }
+        }
+
         &:hover{
             background-color:rgba(0, 128, 0, 0.13) ;
                     transition: all .25s;

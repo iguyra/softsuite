@@ -108,12 +108,37 @@ function Elements() {
 
   useEffect(() => {
     const fetchElements = async () => {
+      setIsLoading(true);
+
       let data = await new makeApiCall().get(`elements`);
       let elements = data.data.content.filter((item) => {
         return item.modifiedBy === "Preston A.";
       });
 
+      elements = await Promise.all(
+        elements.map(async (item) => {
+          let data = await new makeApiCall().get(
+            `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
+          );
+
+          item.categoryValueId = data.name;
+          return item;
+        })
+      );
+
+      elements = await Promise.all(
+        elements.map(async (item) => {
+          let data = await new makeApiCall().get(
+            `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
+          );
+
+          item.classificationValueId = data.name;
+          return item;
+        })
+      );
+
       setElementList(elements);
+      setIsLoading(false);
     };
     fetchElements();
   }, [isDeleted, isAdded]);

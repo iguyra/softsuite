@@ -115,27 +115,27 @@ function Elements() {
         return item.modifiedBy === "Preston A.";
       });
 
-      elements = await Promise.all(
-        elements.map(async (item) => {
-          let data = await new makeApiCall().get(
-            `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
-          );
+      // elements = await Promise.all(
+      //   elements.map(async (item) => {
+      //     let data = await new makeApiCall().get(
+      //       `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
+      //     );
 
-          item.categoryValueId = data.name;
-          return item;
-        })
-      );
+      //     item.categoryValueId = data.name;
+      //     return item;
+      //   })
+      // );
 
-      elements = await Promise.all(
-        elements.map(async (item) => {
-          let data = await new makeApiCall().get(
-            `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
-          );
+      // elements = await Promise.all(
+      //   elements.map(async (item) => {
+      //     let data = await new makeApiCall().get(
+      //       `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
+      //     );
 
-          item.classificationValueId = data.name;
-          return item;
-        })
-      );
+      //     item.classificationValueId = data.name;
+      //     return item;
+      //   })
+      // );
 
       setElementList(elements);
       setIsLoading(false);

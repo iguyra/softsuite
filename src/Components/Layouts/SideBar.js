@@ -179,8 +179,8 @@ const sidebarData = [
 ];
 
 function SideBar() {
-  const [activeMenu, setActiveMenu] = useState(false);
-  const [activeMenuId, setActiveMenuId] = useState();
+  const [activeMenu, setActiveMenu] = useState(true);
+  const [activeMenuId, setActiveMenuId] = useState("elements-setup");
 
   const handleNavClick = (item) => {
     console.log(item);

@@ -191,24 +191,47 @@ function SideBar() {
 
   return (
     <div className="sidebar">
-      {/* <Switch name="Switch module" list={[]} iconPath={"/switch.png"} /> */}
+      <Switch
+        backgroundColor="white"
+        name="Switch module"
+        list={[]}
+        iconPath={"/switch.png"}
+      />
+
+      <ul className="sidebar__list">
+        <div className="sidebar__item">
+          <img src="/dash.png" alt="" />
+
+          <p>Dashboard</p>
+        </div>
+      </ul>
 
       <ul className="sidebar__list">
         {sidebarData.map((item, i) => {
           return (
             <div key={i} className="sidebar__itemcontainer">
-              <div className="sidebar__item">
-                <img src={item.icon} alt="" />
+              {item.chevron ? (
+                <div className="sidebar__item">
+                  <img src={item.icon} alt="" />
 
-                <p onClick={() => handleNavClick(item)}>{item.label}</p>
+                  <p onClick={() => handleNavClick(item)}>{item.label}</p>
 
-                {item.chevron ? <img src="/Iconly.png" alt="" /> : "null"}
-              </div>
+                  {item.chevron ? <img src="/Iconly.png" alt="" /> : null}
+                </div>
+              ) : (
+                <div className="sidebar__item">
+                  <img src={item.icon} alt="" />
+
+                  <p onClick={() => handleNavClick(item)}>{item.label}</p>
+                </div>
+              )}
 
               {item.subItems ? (
                 <ul
                   className={
-                    item.id === activeMenuId && activeMenu ? "active" : ""
+                    item.id === activeMenuId && activeMenu
+                      ? "sidebar__subitem active"
+                      : "sidebar__subitem "
                   }
                 >
                   {item.subItems.map((sub, i) => {

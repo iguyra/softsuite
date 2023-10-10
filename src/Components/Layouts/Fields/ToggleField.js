@@ -9,7 +9,13 @@ function ToggleField(props) {
 
       <div className="radio-row">
         <label className="switch">
-          <input type="checkbox"></input>
+          <input
+            type="checkbox"
+            className="select"
+            name={props.name}
+            placeholder={props.placeholder}
+            {...props.register}
+          ></input>
           <span className="slider"></span>
         </label>
         Active

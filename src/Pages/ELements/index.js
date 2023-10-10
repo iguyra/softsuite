@@ -4,121 +4,68 @@ import { TableList } from "../../Components/Layouts/TableList";
 import { useMemo } from "react";
 
 import React, { useEffect, useState, useCallback } from "react";
-import Select from "react-select";
-import * as Yup from "yup";
-import { debounce } from "lodash";
-import makeApiCall from "../../utils/makeApiCall";
-import { useFormik } from "formik";
 
-import {
-  Col,
-  Row,
-  Label,
-  Input,
-  Modal,
-  ModalBody,
-  Form,
-  FormFeedback,
-} from "reactstrap";
+import makeApiCall from "../../utils/makeApiCall";
+
+import { Label } from "reactstrap";
 import RadioField from "../../Components/Layouts/Fields/RadioField";
 import ToggleField from "../../Components/Layouts/Fields/ToggleField";
+import TextField from "../../Components/Layouts/Fields/TextField";
+import SelectField from "../../Components/Layouts/Fields/SelectField";
+import { useForm, Controller } from "react-hook-form";
 
 function Elements() {
-  const [elements, setElements] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
-  // Column
-  const columns = useMemo(
-    () => [
-      {
-        Header: "Name",
-        accessor: "title",
-        filterable: false,
-      },
-      {
-        Header: "Element Category",
-        Cell: (cellProps) => {
-          let description = cellProps.row.original.description;
-
-          if (!description) return;
-
-          if (description.length > 60) {
-            description = description.slice(0, 60);
-            description = description + "...";
-          }
-
-          return (
-            <React.Fragment>
-              <div>{description}</div>{" "}
-            </React.Fragment>
-          );
-        },
-      },
-
-      {
-        Header: "Element Classification",
-        accessor: "target_group",
-        filterable: false,
-      },
-
-      {
-        Header: "Status",
-        accessor: "status",
-      },
-      {
-        Header: "Date & Time Modified",
-        accessor: "time_modified",
-      },
-      {
-        Header: "Modified By",
-        accessor: "Modified_by",
-      },
-      {
-        Header: "Actions",
-        Cell: (cellProps) => {
-          return (
-            <React.Fragment>
-              <div
-                onClick={() => {
-                  const c = cellProps.row.original;
-                  //   handleEdit(c);
-                }}
-                className="list-inline-item"
-              >
-                edit
-                <i className="ri-folder-fill fs-16"></i>
-              </div>
-              <div
-                onClick={() => {
-                  const clientData = cellProps.row.original;
-                  //   onClickDelete(clientData);
-                }}
-                className="d-inline-block"
-              >
-                delete
-              </div>
-            </React.Fragment>
-          );
-        },
-      },
-    ],
-
-    []
-  );
-
   const [isUpdate, setIsUpdate] = useState(false);
-  const [campaigns, setCampaignsList] = useState([]);
-  const [campaign, setCampaign] = useState([]);
+  const [element, setElement] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isUpdated, setIsUpdated] = useState(false);
-  const [totalCampaigns, setTotalCampaigns] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [IsError, setIsError] = useState(false);
   const [errorMsg, setErrorMsg] = useState(false);
   const [currentTabPlane, setCurrentTabPlane] = useState(1);
+  const [elementsList, setElementList] = useState(1);
+
+  const [elClassificationOptions, setElClassificationOptions] = useState([]);
+  const [elementCategoryOptions, setElementCategoryOptions] = useState([]);
+  const [isSelectedMonthsFieldDisabled, setIsSelectedMonthsFieldDisabled] =
+    useState(true);
+  const [payRunOptions, setPayRunOptions] = useState([]);
+
+  console.log(element, "ELSS");
+
+  const { control, register, handleSubmit, formState, setValue, watch } =
+    useForm({
+      defaultValues: {
+        name: element?.name,
+        description: element?.description,
+        payRunId: element?.payRunId,
+        payRunValueId: element?.payRunValueId,
+        classificationId: element?.classificationId,
+        classificationValueId: element?.classificationValueId,
+        categoryId: element?.categoryId,
+        categoryValueId: element?.categoryValueId,
+        reportingName: element?.reportingName,
+        processingType: element?.processingType,
+        status: "active",
+        prorate: element?.prorate,
+        effectiveStartDate: element?.effectiveStartDate,
+        effectiveEndDate: element?.effectiveEndDate,
+        selectedMonths: [],
+        payFrequency: element?.payFrequency,
+        modifiedBy: "Preston A.",
+      },
+    });
+
+  const watchedClassificationValueId = watch("classificationValueId");
+  const watchedPayFrequency = watch("payFrequency");
+  const watchedPayRunValueId = watch("payRunValueId");
+  const watchedCategoryValueId = watch("categoryValueId");
+  const watchedStatus = watch("status");
 
   const resetFlag = () => {
     setIsSubmitted(false);
@@ -127,10 +74,12 @@ function Elements() {
     setErrorMsg("");
     setIsAdded(false);
     setIsUpdated(false);
-  };
+    setIsUpdate(false);
+    setShowModal(false);
+    setElement({});
 
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [modal, setModal] = useState(false);
+    setCurrentTabPlane(1);
+  };
 
   useEffect(() => {
     if (isDeleted || isAdded || isUpdated || IsError) {
@@ -141,19 +90,107 @@ function Elements() {
   }, [isDeleted, isAdded, isUpdated, IsError]);
 
   useEffect(() => {
-    const getCampaignsList = async () => {
+    if (watchedStatus === false) {
+      setValue("status", "inactive");
+    } else {
+      setValue("status", "active");
+    }
+
+    if (watchedCategoryValueId) {
+      let category = elementCategoryOptions.find(
+        (item) => +item.value === +watchedCategoryValueId
+      );
+
+      if (!category) return;
+
+      console.log(category, "caestofryyyy--");
+
+      setValue("categoryId", +category.lookupId);
+    }
+  }, [watchedCategoryValueId]);
+
+  useEffect(() => {
+    const fetchElements = async () => {
+      let data = await new makeApiCall().get(`elements`);
+      let elements = data.data.content.filter((item) => {
+        return item.modifiedBy === "Preston A.";
+      });
+
+      setElementList(elements);
+    };
+    fetchElements();
+  }, [isDeleted, isAdded]);
+
+  useEffect(() => {
+    if (watchedPayFrequency === "Selected Months") {
+      setIsSelectedMonthsFieldDisabled(false);
+    }
+  }, [watchedPayFrequency, watchedStatus]);
+
+  useEffect(() => {
+    let fetchlookupvalues = async () => {
+      let data = await new makeApiCall().get(
+        `lookups/5/lookupvalues/${+watchedPayRunValueId}`
+      );
+      console.log(data, "FIRST_LOOKUP");
+
+      setValue("payRunId", +data.lookupId);
+    };
+
+    if (watchedPayRunValueId) {
+      fetchlookupvalues();
+    }
+  }, [watchedPayRunValueId]);
+
+  useEffect(() => {
+    let fetchlookupvalues = async () => {
+      let data = await new makeApiCall().get(
+        `lookups/2/lookupvalues/${+watchedClassificationValueId}`
+      );
+      console.log(data, "FIRST_LOOKUP");
+
+      let data_2 = await new makeApiCall().get(`lookups/1/lookupvalues`);
+
+      setValue("classificationId", +data.lookupId);
+
+      let lookupName = data.name;
+
+      let categoryOptions = [];
+      if (data.name === "Non-Grossable Earning") {
+        categoryOptions = data_2.filter(
+          (item) => !item.name.includes("Deduction")
+        );
+      } else {
+        categoryOptions = data_2.filter((item) =>
+          item.name.includes(lookupName)
+        );
+      }
+      console.log(categoryOptions, "categoryOptions===");
+
+      categoryOptions = categoryOptions.map((item) => {
+        return { name: item.name, value: +item.id, ...item };
+      });
+
+      setElementCategoryOptions(categoryOptions);
+    };
+
+    if (watchedClassificationValueId) {
+      fetchlookupvalues();
+    }
+  }, [watchedClassificationValueId]);
+
+  useEffect(() => {
+    const fetchlookupvalues = async () => {
       setIsLoading(true);
 
       try {
-        let data = await new makeApiCall().get(`campaigns`, {
-          params: {
-            skip: 0,
-            limit: 4,
-          },
+        let data = await new makeApiCall().get(`lookups/2/lookupvalues`);
+
+        let el_classification = data.map((item) => {
+          return { name: item.name, value: +item.id };
         });
 
-        setCampaignsList(data.campaigns);
-        setTotalCampaigns(data.totalCount);
+        setElClassificationOptions(el_classification);
 
         setIsLoading(false);
       } catch (err) {
@@ -161,145 +198,47 @@ function Elements() {
         setIsLoading(false);
       }
     };
-    getCampaignsList();
+
+    const fetchPayRunLookUps = async () => {
+      setIsLoading(true);
+
+      try {
+        let data = await new makeApiCall().get(`lookups/5/lookupvalues`);
+
+        let payRunOptions = data.map((item) => {
+          return { name: item.name, value: +item.id };
+        });
+
+        setPayRunOptions(payRunOptions);
+
+        setIsLoading(false);
+      } catch (err) {
+        handleError();
+        setIsLoading(false);
+      }
+    };
+    fetchlookupvalues();
+    fetchPayRunLookUps();
   }, [isSubmitted]);
 
   const toggle = useCallback(() => {
-    setModal(!modal);
-  }, [modal]);
-
-  const validation = useFormik({
-    enableReinitialize: true,
-
-    initialValues: {
-      title: campaign?.title || "Mobile web coming soon	",
-      description:
-        campaign?.description ||
-        "Lorem ipsum dolor sit consectetur. Di am phasellus ut nisl d...",
-      target_group: campaign?.target_group || "",
-      status: campaign?.status || "",
-    },
-
-    validationSchema: Yup.object({
-      title: Yup.string()
-        .required("Please enter campaign title")
-        .max(100, "Maximum length is 100 characters"),
-
-      status: Yup.string()
-        .required("Please enter status here")
-        .max(20, "status cannot be more than 20 characters"),
-
-      target_group: Yup.string().required("Please enter target_group here"),
-
-      description: Yup.string()
-        .required("Please enter description here")
-        .max(100, "description cannot be more than 100 characters"),
-    }),
-
-    onSubmit: async (values) => {
-      resetFlag();
-      setIsLoading(true);
-
-      if (isUpdate) {
-        try {
-          await new makeApiCall().put("campaigns", {
-            ...values,
-            _id: campaign._id,
-          });
-
-          setIsSubmitted(true);
-          setIsLoading(false);
-          setIsUpdated(true);
-          toggle();
-
-          validation.resetForm();
-          setIsLoading(false);
-          return;
-        } catch (err) {
-          handleError(err);
-          setIsLoading(false);
-
-          return;
-        }
-      }
-
-      try {
-        await new makeApiCall().post("campaigns", values);
-
-        setIsLoading(false);
-        setIsSubmitted(true);
-        setIsAdded(true);
-        toggle();
-        validation.resetForm();
-        setIsLoading(false);
-      } catch (err) {
-        handleError(err);
-        setIsLoading(false);
-      }
-    },
-  });
-
-  const handleEdit = (p) => {
-    setIsUpdate(true);
-    setCampaign(p);
-    toggle();
-  };
-
-  const handleToggle = () => {
-    setIsUpdate(false);
-    setCampaign({});
-    toggle();
-  };
-
-  const handleDelete = async (p) => {
+    setShowModal(!showModal);
     resetFlag();
-    setIsLoading(true);
+  }, [showModal]);
 
-    await new makeApiCall().delete("campaigns", {
-      data: {
-        _id: campaign._id,
-      },
+  const handleEdit = (element) => {
+    setIsUpdate(true);
+    setElement(element);
+    Object.keys(element).forEach((key) => {
+      setValue(key, element[key]);
     });
-    setIsSubmitted(true);
-    setDeleteModal(false);
-    setIsLoading(false);
+    setShowModal(!showModal);
+  };
+
+  const onClickDelete = async (p) => {
+    setElement(p);
+    let res = await new makeApiCall().delete(`elements/${p.id}`);
     setIsDeleted(true);
-  };
-
-  const onClickDelete = (p) => {
-    setCampaign(p);
-    setDeleteModal(true);
-  };
-
-  const search = async (term) => {
-    setIsLoading(true);
-
-    try {
-      let data = await new makeApiCall().get(`campaigns/:term`, {
-        params: {
-          term,
-        },
-      });
-      setCampaignsList(data.campaigns);
-      setTotalCampaigns(data.totalCount);
-
-      setIsLoading(false);
-    } catch (err) {
-      handleError(err);
-    }
-  };
-  const searchHandler = useCallback(
-    debounce((term) => {
-      if (term) search(term);
-      else search();
-    }, 500),
-    []
-  );
-
-  const handleSearch = (e) => {
-    let term = e.target.value;
-
-    searchHandler(term);
   };
 
   function handleError(err) {
@@ -312,55 +251,123 @@ function Elements() {
     setErrorMsg(message || "a server error occured");
   }
 
-  const handleOnchange = (e, type = "text") => {
-    let value = e.target.value;
-    let name = e.target.name;
-
-    let regex = /[^a-zA-Z " " .]/;
-
-    if (type === "number") {
-      regex = /[^0-9]/;
-    }
-
-    if (!regex.test(value)) {
-      validation.setFieldValue(name, value);
-    }
-  };
-
-  const fetchData = useCallback(async ({ pageIndex, pageSize }) => {
-    setIsLoading(true);
-
-    const limit = pageSize;
-    const offset = limit * pageIndex;
-
-    try {
-      let data = await new makeApiCall().get(`campaigns`, {
-        params: {
-          skip: offset,
-          limit,
-        },
-      });
-      setCampaignsList(data.campaigns);
-      setIsLoading(false);
-    } catch (err) {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const statusOptions = [
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inactive" },
-  ];
-
-  const targetGroupOptions = [
-    { label: "All customers", value: "All customers" },
-    { label: "customers", value: "customers" },
-  ];
-
   const handleNextTabPlane = (id) => {
     setCurrentTabPlane(id);
     console.log(id, "CURRE_TAB__ID");
   };
+
+  const handleSave = async (values) => {
+    values.categoryId = +values.categoryId;
+    values.categoryValueId = +values.categoryValueId;
+    values.classificationId = +values.classificationId;
+    values.payRunValueId = +values.payRunValueId;
+    values.classificationValueId = +values.classificationValueId;
+    setIsLoading(true);
+    if (!isUpdate) {
+      try {
+        let data = await new makeApiCall().post(`elements`, values);
+
+        setIsAdded(true);
+        handleNextTabPlane(currentTabPlane + 1);
+        setIsLoading(false);
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      try {
+        let data = await new makeApiCall().put(
+          `elements/${element.id}`,
+          values
+        );
+
+        setIsAdded(true);
+        setIsLoading(false);
+
+        handleNextTabPlane(currentTabPlane + 1);
+      } catch (err) {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  console.log(isUpdate, "IsUpdate");
+
+  // Column
+  const columns = useMemo(
+    () => [
+      {
+        Header: "Name",
+        accessor: "name",
+        filterable: false,
+      },
+
+      {
+        Header: "Element Classification",
+        accessor: "classificationValueId",
+        filterable: false,
+      },
+
+      {
+        Header: "Element Category",
+        accessor: "categoryValueId",
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+      },
+      {
+        Header: "Date & Time Modified",
+
+        Cell: (cellProps) => {
+          let date = cellProps.row.original.createdAt.split("T")[0];
+          let time = cellProps.row.original.createdAt.split("T")[1];
+
+          return (
+            <React.Fragment>
+              <div>
+                {date} || {time}
+              </div>{" "}
+            </React.Fragment>
+          );
+        },
+      },
+      {
+        Header: "Modified By",
+        accessor: "modifiedBy",
+      },
+      {
+        Header: "Actions",
+        Cell: (cellProps) => {
+          return (
+            <React.Fragment>
+              <div className="d-inline-block"></div>
+
+              <div className="action-modal">
+                <img
+                  onClick={() => {
+                    const data = cellProps.row.original;
+                    handleEdit(data);
+                  }}
+                  src="/edit.png"
+                  alt=""
+                />
+                <img
+                  onClick={() => {
+                    const data = cellProps.row.original;
+                    onClickDelete(data);
+                  }}
+                  src="/delete.png"
+                  alt=""
+                />
+              </div>
+            </React.Fragment>
+          );
+        },
+      },
+    ],
+
+    []
+  );
 
   return (
     <div className="elementspage">
@@ -375,13 +382,14 @@ function Elements() {
 
           <div onClick={() => setShowModal(true)} className="create-card">
             create element
+            <img src="/plus.png" alt="" />
           </div>
         </div>
 
-        {elements.length > 0 ? (
+        {elementsList.length > 0 ? (
           <TableList
             columns={columns}
-            data={[]}
+            data={elementsList}
             isGlobalFilter={false}
             isAddUserList={false}
             customFetchData={() => 0}
@@ -404,93 +412,67 @@ function Elements() {
       <div
         className={`modal ${showModal ? "active" : ""}`}
         id="showModal"
-        size="lg"
-        isOpen={true}
-        toggle={toggle}
         centered
       >
         <div className="modal__container">
           <div className="modal__head">
-            <h4>Create Element</h4>
+            <h4>{isUpdate ? "Update" : "Create"} Element</h4>
           </div>
 
-          <Form
-            onSubmit={(e) => {
-              e.preventDefault();
-              validation.handleSubmit();
-              return false;
-            }}
-          >
+          <form onSubmit={handleSubmit(handleSave)}>
             <div
               className={`tabPlane ${currentTabPlane === 1 ? "active" : ""}`}
             >
               <div className="row">
-                <div className="form__group">
-                  <Label className="label"> Name</Label>
+                <TextField
+                  name="name"
+                  label="Name"
+                  placeholder="input name"
+                  register={register("name", {
+                    required: "Please input a name",
+                  })}
+                  errors={formState.errors}
+                />
 
-                  <input
-                    className="select"
-                    name="name"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
-                    placeholder="input name"
-                    //   value={industryOptions.find(
-                    //     (g) => g.value === validation.values.industry
-                    //   )}
-                    //   invalid={
-                    //     validation.touched.industry && validation.errors.industry
-                    //       ? true
-                    //       : false
-                    //   }
-                  />
-                </div>
-                <div className="form__group">
-                  <Label className="label">Element Classification</Label>
-
-                  <Select
-                    className="select"
-                    name="classification"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
-                    options={[{ label: "one", value: "1", name: "e" }]}
-                    placeholder="select a classification..."
-                    id="classification-input"
-                  />
-                </div>
+                <SelectField
+                  className="select"
+                  name="classificationValueId"
+                  label="Element Classification"
+                  placeholder="select a classification..."
+                  register={register("classificationValueId", {
+                    required: "Please select a Classification",
+                  })}
+                  options={elClassificationOptions}
+                  errors={formState.errors}
+                />
               </div>
 
               <div className="row">
-                <div className="form__group">
-                  <Label className="label">Element Category</Label>
+                <SelectField
+                  className="select"
+                  label="Element Category"
+                  name="categoryValueId"
+                  options={elementCategoryOptions}
+                  placeholder="select Element category..."
+                  register={register("categoryValueId", {
+                    required: "Please select a category",
+                  })}
+                  errors={formState.errors}
+                />
 
-                  <Select
-                    className="select"
-                    name="category"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
-                    options={[{ label: "one", value: "1", name: "e" }]}
-                    placeholder="select Element category..."
-                    id="category-input"
-                  />
-                </div>
-                <div className="form__group">
-                  <Label className="label">Element payrun</Label>
-
-                  <Select
-                    className="select"
-                    name="payrun"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
-                    options={[{ label: "one", value: "1", name: "e" }]}
-                    placeholder="select Payrun..."
-                    id="payrun-input"
-                  />
-                </div>
+                <SelectField
+                  className="select"
+                  name="payRunValueId"
+                  options={payRunOptions}
+                  placeholder="select Payrun..."
+                  label="Element payrun"
+                  register={register("payRunValueId", {
+                    required: "Please select a payrun",
+                  })}
+                  errors={formState.errors}
+                />
               </div>
+
               <div className="row no-grid">
                 <div className="form__group">
                   <Label className="label">Description</Label>
@@ -499,13 +481,19 @@ function Elements() {
                     className="select"
                     style={{ width: "100%", height: "10rem" }}
                     name="description"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
                     options={[{ label: "one", value: "1", name: "e" }]}
                     placeholder="Input Description"
                     id="description-input"
+                    {...register("description", {
+                      required: "Please input a description",
+                      minLength: 2,
+                    })}
                   />
+                  {formState.errors && formState.errors.description ? (
+                    <p className="fieldError">
+                      {formState.errors.description.message}
+                    </p>
+                  ) : null}
                 </div>
               </div>
               <div className="row no-grid">
@@ -516,13 +504,19 @@ function Elements() {
                     className="select"
                     style={{ width: "100%", height: "10rem" }}
                     name="reporting"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
                     options={[{ label: "one", value: "1", name: "e" }]}
                     placeholder="Input Reporting Name"
                     id="Reporting-input"
+                    {...register("reportingName", {
+                      minLength: 2,
+                      required: "PLease input a reporting name",
+                    })}
                   />
+                  {formState.errors && formState.errors.reportingName ? (
+                    <p className="fieldError">
+                      {formState.errors.reportingName.message}
+                    </p>
+                  ) : null}
                 </div>
               </div>
               <div className="row">
@@ -552,43 +546,37 @@ function Elements() {
 
                   <input
                     className="select"
-                    name="name"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
+                    name="effectiveStartDate"
+                    type="date"
                     placeholder="select date"
+                    {...register("effectiveStartDate", {
+                      required: "Please select an Effective start date",
+                    })}
                   />
+
+                  {formState.errors.effectiveStartDate ? (
+                    <p className="fieldError">
+                      {formState.errors.effectiveStartDate.message}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="form__group">
                   <Label className="label"> Effective End date</Label>
 
-                  <Select
+                  <input
                     className="select"
-                    name="classification"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
-                    options={[{ label: "one", value: "1", name: "e" }]}
-                    placeholder="select a classification..."
-                    id="classification-input"
+                    name="effectiveEndDate"
+                    type="date"
+                    placeholder="select date"
+                    {...register("effectiveEndDate", {
+                      required: "Please select an Effective End date",
+                    })}
                   />
-                </div>
-              </div>
-
-              <div className="row no-grid">
-                <div className="form__group">
-                  <Label className="label">Selected Pay Months</Label>
-
-                  <Select
-                    className="select"
-                    name="category"
-                    //   onChange={(e) =>
-                    //     validation.setFieldValue("industry", e.value)
-                    //   }
-                    options={[{ label: "one", value: "1", name: "e" }]}
-                    placeholder="Select"
-                    id="category-input"
-                  />
+                  {formState.errors.effectiveEndDate ? (
+                    <p className="fieldError">
+                      {formState.errors.effectiveEndDate.message}
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
@@ -597,12 +585,43 @@ function Elements() {
                   label="Proccessing Type"
                   firstRadioName="Open"
                   secondRadioName="Closed"
+                  name="processingType"
+                  register={register("processingType")}
+                  errors={formState.errors}
                 />
 
                 <RadioField
                   label="Pay Frequency"
                   firstRadioName="Monthly"
                   secondRadioName="Selected Months"
+                  register={register("payFrequency")}
+                  name="payFrequency"
+                  errors={formState.errors}
+                />
+              </div>
+              <div className="row no-grid">
+                <SelectField
+                  className="select"
+                  label="Selected Pay Months"
+                  disabled={isSelectedMonthsFieldDisabled}
+                  options={[
+                    { name: "January", value: "January" },
+                    { name: "February", value: "February" },
+                    { name: "March", value: "March" },
+                    { name: "April", value: "April" },
+                    { name: "May", value: "May" },
+                    { name: "June", value: "June" },
+                    { name: "July", value: "July" },
+                    { name: "August", value: "August" },
+                    { name: "September", value: "September" },
+                    { name: "October", value: "October" },
+                    { name: "November", value: "November" },
+                    { name: "December", value: "December" },
+                  ]}
+                  name="selectedMonths"
+                  placeholder="Select"
+                  {...register("selectedMonths", { minLength: 2 })}
+                  isMulti={true}
                 />
               </div>
 
@@ -611,29 +630,73 @@ function Elements() {
                   label="Prorate"
                   firstRadioName="Yes"
                   secondRadioName="No"
+                  register={register("prorate")}
+                  name="prorate"
+                  errors={formState.errors}
                 />
 
-                <ToggleField />
+                <ToggleField
+                  label="Prorate"
+                  firstRadioName="Yes"
+                  secondRadioName="No"
+                  register={register("status")}
+                  name="status"
+                />
               </div>
 
               <div className="row">
                 <div className="form__group">
-                  <div
-                    onClick={() => setShowModal(false)}
-                    className="cancel-button"
-                  >
+                  <div onClick={() => toggle()} className="cancel-button">
                     Cancel
                   </div>
                 </div>
+
                 <div
                   className="form__group"
-                  onClick={() => handleNextTabPlane(currentTabPlane + 1)}
+                  // onClick={() => handleNextTabPlane(currentTabPlane + 1)}
                 >
-                  <div className="next-button">Next</div>
+                  <button
+                    type="submit"
+                    className="next-button"
+                    disabled={isLoading}
+                  >
+                    {isLoading
+                      ? "please wait"
+                      : isUpdate
+                      ? "Update Element"
+                      : "Create Element"}
+                  </button>
+                </div>
+
+                <div className="form__group">
+                  <div
+                    onClick={() => handleNextTabPlane(currentTabPlane - 1)}
+                    className="back-button"
+                  >
+                    {"<"} Go back
+                  </div>
                 </div>
               </div>
             </div>
-          </Form>
+
+            <div
+              className={`tabPlane ${currentTabPlane === 3 ? "active" : ""}`}
+            >
+              <div className="success">
+                <img src="/check.png" alt="" />
+                <p>
+                  Element has been {isUpdate ? "updated" : "created"}{" "}
+                  successfully
+                </p>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="next-button"
+                >
+                  Close to continue
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

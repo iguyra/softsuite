@@ -105,8 +105,6 @@ export const TableList = ({
   return (
     <Fragment>
       <div className="tabs">
-        <p className="total">{customTotalSize} total items</p>
-
         <div className={divClass}>
           <Table hover {...getTableProps()} className={tableClass}>
             <thead className={theadClass}>

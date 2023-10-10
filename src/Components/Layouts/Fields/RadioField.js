@@ -11,23 +11,24 @@ function RadioField(props) {
         <input
           type="radio"
           className="select"
-          name="category"
-          options={[{ label: "one", value: "1", name: "e" }]}
-          placeholder="select Element category..."
-          id="category-input"
+          name={props.name}
+          {...props.register}
+          defaultValue={props.firstRadioName}
+          checked
         />
         <span>{props.firstRadioName}</span>
 
         <input
           type="radio"
           className="select"
-          name="category"
-          options={[{ label: "one", value: "1", name: "e" }]}
-          placeholder="select Element category..."
-          id="category-input"
+          name={props.name}
+          {...props.register}
+          value={props.secondRadioName}
         />
         <span>{props.secondRadioName}</span>
       </div>
+
+      <p>{props.errors[props.name] && props.errors[props.name].message}</p>
     </div>
   );
 }

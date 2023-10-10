@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Switch from "../Modules/Switch";
 
 const sidebarData = [
@@ -182,6 +182,8 @@ function SideBar() {
   const [activeMenu, setActiveMenu] = useState(true);
   const [activeMenuId, setActiveMenuId] = useState("elements-setup");
 
+  // useEffect(() => {}, [activeMenu, activeMenuId]);
+
   const handleNavClick = (item) => {
     console.log(item);
 
@@ -212,9 +214,8 @@ function SideBar() {
             <div key={i} className="sidebar__itemcontainer">
               {item.chevron ? (
                 <div
-                  // className="sidebar__item"
                   className={
-                    item.id === activeMenuId && activeMenu
+                    item.id === activeMenuId
                       ? "sidebar__item active"
                       : "sidebar__item "
                   }
@@ -223,19 +224,16 @@ function SideBar() {
 
                   <p onClick={() => handleNavClick(item)}>{item.label}</p>
 
-                  {item.id === activeMenuId && activeMenu ? (
+                  {item.id === activeMenuId ? (
                     <img src="/arrow-down.png" alt="" />
                   ) : (
                     <img src="/Iconly.png" alt="" />
                   )}
-
-                  {/* {item.chevron ? <img src="/Iconly.png" alt="" /> : null} */}
                 </div>
               ) : (
                 <div
-                  // className="sidebar__item "
                   className={
-                    item.id === activeMenuId && activeMenu
+                    item.id === activeMenuId
                       ? "sidebar__item active"
                       : "sidebar__item "
                   }
@@ -247,13 +245,7 @@ function SideBar() {
               )}
 
               {item.subItems ? (
-                <ul
-                  className={
-                    item.id === activeMenuId && activeMenu
-                      ? "sidebar__subitem active"
-                      : "sidebar__subitem "
-                  }
-                >
+                <ul className={item.id === activeMenuId ? "active" : " "}>
                   {item.subItems.map((sub, i) => {
                     return <li key={i}>{sub.label}</li>;
                   })}

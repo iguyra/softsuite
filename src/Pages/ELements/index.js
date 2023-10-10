@@ -373,7 +373,7 @@ function Elements() {
             <React.Fragment>
               <div>
                 {date} || {time}
-              </div>{" "}
+              </div>
             </React.Fragment>
           );
         },

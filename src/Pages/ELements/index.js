@@ -29,6 +29,7 @@ function Elements() {
   const [errorMsg, setErrorMsg] = useState(false);
   const [currentTabPlane, setCurrentTabPlane] = useState(1);
   const [elementsList, setElementList] = useState(1);
+  const [api, setAPI] = useState();
 
   const [elClassificationOptions, setElClassificationOptions] = useState([]);
   const [elementCategoryOptions, setElementCategoryOptions] = useState([]);
@@ -87,6 +88,11 @@ function Elements() {
   }, [isDeleted, isAdded, isUpdated, IsError]);
 
   useEffect(() => {
+    const api = new makeApiCall();
+    setAPI(api);
+  }, []);
+
+  useEffect(() => {
     if (watchedStatus === false) {
       setValue("status", "inactive");
     } else {
@@ -110,38 +116,120 @@ function Elements() {
     const fetchElements = async () => {
       setIsLoading(true);
 
-      let data = await new makeApiCall().get(`elements`);
-      let elements = data.data.content.filter((item) => {
-        return item.modifiedBy === "Preston A.";
-      });
+      if (!api) return;
 
-      // elements = await Promise.all(
-      //   elements.map(async (item) => {
-      //     let data = await new makeApiCall().get(
-      //       `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
-      //     );
+      try {
+        // const api = new makeApiCall();
 
-      //     item.categoryValueId = data.name;
-      //     return item;
-      //   })
-      // );
+        let data = await api.get(`elements`);
+        let elements = data.data.content.filter(
+          (item) => item.modifiedBy === "Preston A."
+        );
 
-      // elements = await Promise.all(
-      //   elements.map(async (item) => {
-      //     let data = await new makeApiCall().get(
-      //       `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
-      //     );
+        // Parallelize API calls using Promise.all()
+        // const categoryValuePromises = elements.map(async (item) => {
+        //   let data = await api.get(
+        //     `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
+        //   );
+        //   item.categoryValueId = data.name;
+        //   return item;
+        // });
 
-      //     item.classificationValueId = data.name;
-      //     return item;
-      //   })
-      // );
+        // const classificationValuePromises = elements.map(async (item) => {
+        //   let data = await api.get(
+        //     `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
+        //   );
+        //   item.classificationValueId = data.name;
+        //   return item;
+        // });
 
-      setElementList(elements);
-      setIsLoading(false);
+        // // Wait for all API calls to complete using Promise.all()
+        // elements = await Promise.all([
+        //   ...categoryValuePromises,
+        //   ...classificationValuePromises,
+        // ]);
+
+        setElementList(elements);
+        setIsLoading(false);
+      } catch (error) {
+        // Handle errors here
+        console.error("Error fetching elements:", error);
+        setIsLoading(false);
+      }
     };
+
     fetchElements();
-  }, [isDeleted, isAdded]);
+  }, [isDeleted, isAdded, api]);
+
+  // useEffect(() => {
+  //   const fetchElements = async () => {
+  //     setIsLoading(true);
+  //     let api = new makeApiCall();
+
+  //     let data = await api.get(`elements`);
+  //     let elements = data.data.content.filter((item) => {
+  //       return item.modifiedBy === "Preston A.";
+  //     });
+
+  //     // let category_lookup = await api.get(
+  //     //   `lookups/${item.categoryId}/lookupvalues/`
+  //     // );
+
+  //     // console.log(category_lookup, "category__VALUES");
+
+  //     // elements = await Promise.all(
+  //     //   elements.map(async (item) => {
+  //     //     let data = await api.get(
+  //     //       `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
+  //     //     );
+
+  //     //     item.classificationValueId = data.name;
+  //     //     return item;
+  //     //   })
+  //     // );
+
+  //     setElementList(elements);
+  //     setIsLoading(false);
+  //   };
+  //   fetchElements();
+  // }, [isDeleted, isAdded]);
+
+  // useEffect(() => {
+  //   const fetchElements = async () => {
+  //     setIsLoading(true);
+
+  //     let data = await new makeApiCall().get(`elements`);
+  //     let elements = data.data.content.filter((item) => {
+  //       return item.modifiedBy === "Preston A.";
+  //     });
+
+  //     elements = await Promise.all(
+  //       elements.map(async (item) => {
+  //         let data = await new makeApiCall().get(
+  //           `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
+  //         );
+
+  //         item.categoryValueId = data.name;
+  //         return item;
+  //       })
+  //     );
+
+  //     elements = await Promise.all(
+  //       elements.map(async (item) => {
+  //         let data = await new makeApiCall().get(
+  //           `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
+  //         );
+
+  //         item.classificationValueId = data.name;
+  //         return item;
+  //       })
+  //     );
+
+  //     setElementList(elements);
+  //     setIsLoading(false);
+  //   };
+  //   fetchElements();
+  // }, [isDeleted, isAdded]);
 
   useEffect(() => {
     if (watchedPayFrequency === "Selected Months") {
@@ -150,8 +238,10 @@ function Elements() {
   }, [watchedPayFrequency, watchedStatus]);
 
   useEffect(() => {
+    if (!api) return;
+
     let fetchlookupvalues = async () => {
-      let data = await new makeApiCall().get(
+      let data = await api.get(
         `lookups/5/lookupvalues/${+watchedPayRunValueId}`
       );
       console.log(data, "FIRST_LOOKUP");
@@ -162,16 +252,18 @@ function Elements() {
     if (watchedPayRunValueId) {
       fetchlookupvalues();
     }
-  }, [watchedPayRunValueId]);
+  }, [watchedPayRunValueId, api]);
 
   useEffect(() => {
+    if (!api) return;
+
     let fetchlookupvalues = async () => {
-      let data = await new makeApiCall().get(
+      let data = await api.get(
         `lookups/2/lookupvalues/${+watchedClassificationValueId}`
       );
       console.log(data, "FIRST_LOOKUP");
 
-      let data_2 = await new makeApiCall().get(`lookups/1/lookupvalues`);
+      let data_2 = await api.get(`lookups/1/lookupvalues`);
 
       setValue("classificationId", +data.lookupId);
 
@@ -199,14 +291,16 @@ function Elements() {
     if (watchedClassificationValueId) {
       fetchlookupvalues();
     }
-  }, [watchedClassificationValueId]);
+  }, [watchedClassificationValueId, api]);
 
   useEffect(() => {
+    if (!api) return;
+
     const fetchlookupvalues = async () => {
       setIsLoading(true);
 
       try {
-        let data = await new makeApiCall().get(`lookups/2/lookupvalues`);
+        let data = await api.get(`lookups/2/lookupvalues`);
 
         let el_classification = data.map((item) => {
           return { name: item.name, value: +item.id };
@@ -225,7 +319,7 @@ function Elements() {
       setIsLoading(true);
 
       try {
-        let data = await new makeApiCall().get(`lookups/5/lookupvalues`);
+        let data = await api.get(`lookups/5/lookupvalues`);
 
         let payRunOptions = data.map((item) => {
           return { name: item.name, value: +item.id };
@@ -241,7 +335,7 @@ function Elements() {
     };
     fetchlookupvalues();
     fetchPayRunLookUps();
-  }, [isSubmitted]);
+  }, [isSubmitted, api]);
 
   const toggle = useCallback(() => {
     setShowModal(!showModal);
@@ -261,7 +355,7 @@ function Elements() {
     setElement(p);
     setIsLoading(true);
     try {
-      await new makeApiCall().delete(`elements/${p.id}`);
+      await api.delete(`elements/${p.id}`);
       setIsDeleted(true);
       setIsLoading(false);
     } catch (err) {
@@ -281,7 +375,6 @@ function Elements() {
 
   const handleNextTabPlane = (id) => {
     setCurrentTabPlane(id);
-    console.log(id, "CURRE_TAB__ID");
   };
 
   const handleSave = async (values) => {
@@ -293,7 +386,7 @@ function Elements() {
     setIsLoading(true);
     if (!isUpdate) {
       try {
-        let data = await new makeApiCall().post(`elements`, values);
+        let data = await api.post(`elements`, values);
 
         setIsAdded(true);
         handleNextTabPlane(currentTabPlane + 1);
@@ -303,10 +396,7 @@ function Elements() {
       }
     } else {
       try {
-        let data = await new makeApiCall().put(
-          `elements/${element.id}`,
-          values
-        );
+        let data = await api.put(`elements/${element.id}`, values);
 
         setIsAdded(true);
         setIsLoading(false);

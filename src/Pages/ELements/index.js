@@ -285,6 +285,8 @@ function Elements() {
   const onClickDelete = async (p) => {
     setElement(p);
     setIsLoading(true);
+    const api = new makeApiCall();
+
     try {
       await api.delete(`elements/${p.id}`);
       setIsDeleted(true);

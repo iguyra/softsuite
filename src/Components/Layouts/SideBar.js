@@ -182,8 +182,6 @@ function SideBar() {
   const [activeMenu, setActiveMenu] = useState(true);
   const [activeMenuId, setActiveMenuId] = useState("elements-setup");
 
-  // useEffect(() => {}, [activeMenu, activeMenuId]);
-
   const handleNavClick = (item) => {
     console.log(item);
 

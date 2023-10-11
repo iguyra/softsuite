@@ -12,7 +12,7 @@ import RadioField from "../../Components/Layouts/Fields/RadioField";
 import ToggleField from "../../Components/Layouts/Fields/ToggleField";
 import TextField from "../../Components/Layouts/Fields/TextField";
 import SelectField from "../../Components/Layouts/Fields/SelectField";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 function Elements() {
   const [showModal, setShowModal] = useState(false);
@@ -106,8 +106,6 @@ function Elements() {
 
       if (!category) return;
 
-      console.log(category, "caestofryyyy--");
-
       setValue("categoryId", +category.lookupId);
     }
   }, [watchedCategoryValueId]);
@@ -123,32 +121,6 @@ function Elements() {
         let elements = data.data.content.filter(
           (item) => item.modifiedBy === "Preston A."
         );
-
-        // const categoryValuePromises = elements.map((item) =>
-        //   api.get(
-        //     `lookups/${item.categoryId}/lookupvalues/${item.categoryValueId}`
-        //   )
-        // );
-        // const classificationValuePromises = elements.map((item) =>
-        //   api.get(
-        //     `lookups/${item.classificationId}/lookupvalues/${item.classificationValueId}`
-        //   )
-        // );
-
-        // // Wait for all categoryValueId and classificationValueId API calls to complete
-        // const [categoryValues, classificationValues] = await Promise.all([
-        //   Promise.all(categoryValuePromises),
-        //   Promise.all(classificationValuePromises),
-        // ]);
-
-        // console.log(categoryValues, classificationValues, "SLSLSLLSL");
-
-        // // Process responses and update elements
-        // elements = elements.map((item, index) => {
-        //   item.categoryValueId = categoryValues[index].name;
-        //   item.classificationValueId = classificationValues[index].name;
-        //   return item;
-        // });
 
         setElementList(elements);
         setIsLoading(false);
@@ -264,8 +236,9 @@ function Elements() {
   }, [isSubmitted, api]);
 
   const toggle = useCallback(() => {
-    setShowModal(!showModal);
     resetFlag();
+
+    setShowModal(!showModal);
   }, [showModal]);
 
   const handleEdit = (element) => {
@@ -311,13 +284,11 @@ function Elements() {
     values.classificationId = +values.classificationId;
     values.payRunValueId = +values.payRunValueId;
     values.classificationValueId = +values.classificationValueId;
-    // setIsLoading(true);
-
-    // return;
+    setIsLoading(true);
 
     if (!isUpdate) {
       try {
-        let data = await api.post(`elements`, values);
+        await api.post(`elements`, values);
 
         setIsAdded(true);
         handleNextTabPlane(currentTabPlane + 1);
@@ -327,7 +298,7 @@ function Elements() {
       }
     } else {
       try {
-        let data = await api.put(`elements/${element.id}`, values);
+        await api.put(`elements/${element.id}`, values);
 
         setIsAdded(true);
         setIsLoading(false);
@@ -569,10 +540,7 @@ function Elements() {
               </div>
               <div className="row">
                 <div className="form__group">
-                  <div
-                    onClick={() => setShowModal(false)}
-                    className="cancel-button"
-                  >
+                  <div onClick={() => toggle()} className="cancel-button">
                     Cancel
                   </div>
                 </div>

@@ -48,13 +48,13 @@ function Elements() {
       categoryId: element?.categoryId,
       categoryValueId: element?.categoryValueId,
       reportingName: element?.reportingName,
-      processingType: element?.processingType,
+      processingType: element?.processingType || "Open",
       status: "active",
-      prorate: element?.prorate,
+      prorate: element?.prorate || "Yes",
       effectiveStartDate: element?.effectiveStartDate,
       effectiveEndDate: element?.effectiveEndDate,
       selectedMonths: [],
-      payFrequency: element?.payFrequency,
+      payFrequency: element?.payFrequency || "Monthly",
       modifiedBy: "Preston A.",
     },
   });
@@ -173,7 +173,6 @@ function Elements() {
       let data = await api.get(
         `lookups/5/lookupvalues/${+watchedPayRunValueId}`
       );
-      console.log(data, "FIRST_LOOKUP");
 
       setValue("payRunId", +data.lookupId);
     };
@@ -216,10 +215,6 @@ function Elements() {
     };
 
     if (watchedClassificationValueId) {
-      console.log(
-        watchedClassificationValueId,
-        "watchedClassificationValueId>>"
-      );
       fetchlookupvalues();
     }
   }, [watchedClassificationValueId, api]);
@@ -316,7 +311,10 @@ function Elements() {
     values.classificationId = +values.classificationId;
     values.payRunValueId = +values.payRunValueId;
     values.classificationValueId = +values.classificationValueId;
-    setIsLoading(true);
+    // setIsLoading(true);
+
+    // return;
+
     if (!isUpdate) {
       try {
         let data = await api.post(`elements`, values);

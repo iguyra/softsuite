@@ -14,7 +14,6 @@ function RadioField(props) {
           name={props.name}
           {...props.register}
           defaultValue={props.firstRadioName}
-          checked
         />
         <span>{props.firstRadioName}</span>
 
@@ -23,7 +22,7 @@ function RadioField(props) {
           className="select"
           name={props.name}
           {...props.register}
-          value={props.secondRadioName}
+          defaultValue={props.secondRadioName}
         />
         <span>{props.secondRadioName}</span>
       </div>

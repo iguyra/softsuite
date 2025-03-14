@@ -268,7 +268,7 @@ function Elements() {
           return (
             <React.Fragment>
               <div>
-                {date} || {time}
+                {date} || {time?.split(".")[0]}
               </div>
             </React.Fragment>
           );
@@ -342,7 +342,7 @@ function Elements() {
               <input
                 onChange={handleSearch}
                 type="text"
-                placeholder="search for by name..."
+                placeholder="search by name, pay run..."
               />
               <div className="search__button">
                 <img src="/search-button.png" alt="" />
@@ -416,7 +416,13 @@ function Elements() {
                   label="Name"
                   placeholder="input name"
                   value={validation.values.name || ""}
-                  onChange={validation.handleChange}
+                  // onChange={validation.handleChange}
+                  onChange={(e) => {
+                    console.log(e.target.value, "EVALL");
+                    const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+
+                    validation.setFieldValue(`name`, value);
+                  }}
                   validation={validation}
                   onBlur={validation.handleBlur}
                 />
@@ -472,7 +478,15 @@ function Elements() {
                     placeholder="Input Description"
                     id="description-input"
                     value={validation.values.description || ""}
-                    onChange={validation.handleChange}
+                    onChange={(e) => {
+                      console.log(e.target.value, "EVALL");
+                      const value = e.target.value.replace(
+                        /[^a-zA-Z0-9\s.,]/g,
+                        ""
+                      );
+
+                      validation.setFieldValue(`description`, value);
+                    }}
                     validation={validation}
                     onBlur={validation.handleBlur}
                   />

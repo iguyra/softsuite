@@ -129,7 +129,7 @@ export const TableList = ({
     console.log(newPageNumber, "NEW__PAGE_NUMBER2222");
 
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set("offset", 5 * newPageNumber);
+    newSearchParams.set("offset", 4 * newPageNumber);
     // newSearchParams.set("limit", 5);
 
     // Replace the current URL with the updated query parameters
@@ -185,7 +185,7 @@ export const TableList = ({
             onChange={onPaginationChange}
             align="end"
             defaultCurrent={1}
-            defaultPageSize={5}
+            defaultPageSize={4}
             total={customTotalSize}
           />
         )}

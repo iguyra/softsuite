@@ -99,14 +99,6 @@ const sidebarData = [
   },
 
   {
-    id: "Employee",
-    label: "Employee Structure",
-    icon: "/employee.png",
-    link: "/employee",
-  },
-  //
-  //
-  {
     id: "payroll-settings",
     label: "Payroll Settings",
     icon: "/settings.png",

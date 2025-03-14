@@ -388,6 +388,15 @@ input[type="radio"] {
   transition: all 0.25s;
 }
 
+.total_items {
+  margin-left: 1.2rem;
+  font-size: 1.3rem;
+  padding: 0.5rem 0;
+  background-color: #cccccc5e;
+  display: inline-block;
+  padding: 1rem;
+}
+
 .loader {
   height: 15px;
   aspect-ratio: 5;

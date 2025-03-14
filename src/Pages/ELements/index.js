@@ -16,6 +16,8 @@ import SelectField from "../../Components/Layouts/Fields/SelectField";
 import { Tag } from "antd";
 import { SyncOutlined } from "@ant-design/icons";
 import { debounce } from "lodash";
+import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import useSWR from "swr";
 
@@ -86,12 +88,22 @@ function Elements() {
   const [phonebooks, setElementList] = useState([]);
   const [isSearching, setIsSearching] = useState("");
 
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+
+  // Access a specific query parameter
+  const type = query.get("type") || "";
+
+  const offset = query.get("offset") || "";
+
+  console.log(offset, "OFFSETT");
+
   const showDeleteModal = (item) => {
     setIsModalOpen(true);
     setElement(item);
   };
 
-  const url = isSearching ? `element/:term?term=${isSearching}` : `element`;
+  const url = `element/:term?term=${isSearching || ""}&offset=${offset || ""}`;
 
   let { data, mutate, isValidating } = useSWR(url, fetcher, {
     keepPreviousData: true,
@@ -353,9 +365,10 @@ function Elements() {
           isGlobalFilter={false}
           isAddUserList={false}
           customFetchData={() => 0}
-          customTotalSize={4}
+          customTotalSize={data?.totalCount}
           customPageSize={4}
           theadClass="table-light"
+          pagination
         />
 
         {isValidating && (

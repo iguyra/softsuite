@@ -3,10 +3,13 @@ import PropTypes from "prop-types";
 import { useTable, useSortBy, useExpanded, usePagination } from "react-table";
 import { Table, Row } from "reactstrap";
 // import { Pagination } from "./Pagination";
-
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Col, Button, Input } from "reactstrap";
+import { Pagination } from "antd";
 export const TableList = ({
   columns,
   data,
+  pageOptions,
 
   customPageSize,
   customTotalSize,
@@ -15,6 +18,7 @@ export const TableList = ({
   theadClass,
   thClass,
   divClass,
+  pagination,
 }) => {
   const {
     getTableProps,
@@ -61,6 +65,13 @@ export const TableList = ({
 
   const [pageNumbers, setPageNumbers] = useState(range(1, 2, 1));
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [limit, setLimit] = useState(5);
+
+  const navigate = useNavigate();
+
+  const [pageNumber, setPageNumber] = useState(0);
+
   const generateSortingIndicator = (column) => {
     return column.isSorted ? (column.isSortedDesc ? " " : "") : "";
   };
@@ -100,6 +111,30 @@ export const TableList = ({
     setCurrentPage(pageIndex);
 
     customFetchData({ pageIndex: pageIndex - 1, pageSize });
+  };
+
+  // const onPaginationChange = (e) => {
+  //   console.log(e, "CHAINNGG");
+  // };
+
+  const onPaginationChange = (newPageNumber) => {
+    console.log(newPageNumber, "NEW__PAGE_NUMBER");
+    newPageNumber = newPageNumber - 1;
+
+    if (newPageNumber < 0) return;
+
+    // if (limit * newPageNumber > customPageSize) return;
+
+    setPageNumber(newPageNumber);
+    console.log(newPageNumber, "NEW__PAGE_NUMBER2222");
+
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("offset", 2 * newPageNumber);
+    newSearchParams.set("limit", 5);
+
+    // Replace the current URL with the updated query parameters
+    // history.replace({ search: newSearchParams.toString() });
+    navigate({ search: newSearchParams.toString() });
   };
 
   return (
@@ -145,87 +180,15 @@ export const TableList = ({
           </Table>
         </div>
 
-        <Row className="justify-content-md-end justify-content-center align-items-center pe-2">
-          {/* <Pagination /> */}
-
-          {/* <div className="pagination">
-            <div className="pagination__container">
-              <ul>
-                <img
-                  onClick={() => handlePagination(currentPage - 1, "prev")}
-                  src="/static/icons/prevbutton.png"
-                  alt=""
-                />
-
-                {pageNumbers.length &&
-                  pageNumbers.map((n, i) => {
-                    return (
-                      <li
-                        onClick={() => handlePagination(n)}
-                        className={n === currentPage ? "activepage" : ""}
-                        key={n}
-                      >
-                        {n}
-                      </li>
-                    );
-                  })}
-
-                <li>...</li>
-
-                <li
-                  onClick={() =>
-                    handlePagination(Math.ceil(customTotalSize / pageSize))
-                  }
-                  className={
-                    currentPage === Math.ceil(customTotalSize / pageSize)
-                      ? "activepage"
-                      : ""
-                  }
-                >
-                  {Math.ceil(customTotalSize / pageSize)}
-                </li>
-
-                <img
-                  onClick={() => handlePagination(currentPage + 1, "next")}
-                  src="/static/icons/forwardbutton.png"
-                  alt=""
-                />
-              </ul>
-            </div>
-          </div> */}
-
-          {/*  */}
-          {/* <div className="pagination">
-            <div className="pagination__container">
-              <ul>
-                <img
-                  onClick={() => handlePagination(pageIndex - 1)}
-                  src="/static/icons/prevbutton.png"
-                  alt=""
-                />
-
-                {pageNumbers.length &&
-                  pageNumbers.map((n, i) => {
-                    return (
-                      <li
-                        onClick={() => handlePagination(i)}
-                        className={i === pageIndex ? "activepage" : ""}
-                        key={n}
-                      >
-                        {n}
-                      </li>
-                    );
-                  })}
-
-                <img
-                  onClick={() => handlePagination(pageIndex + 1)}
-                  src="/static/icons/forwardbutton.png"
-                  alt=""
-                />
-              </ul>
-            </div>
-          </div> */}
-        </Row>
+        {pagination && (
+          <Pagination
+            onChange={onPaginationChange}
+            align="end"
+            defaultCurrent={1}
+            defaultPageSize={5}
+            total={customTotalSize}
+          />
+        )}
       </div>
     </Fragment>
   );

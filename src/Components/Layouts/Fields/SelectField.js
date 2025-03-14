@@ -1,6 +1,5 @@
 import React from "react";
-
-import { Label } from "reactstrap";
+import { Col, Input, Label, FormFeedback } from "reactstrap";
 
 function SelectField(props) {
   return (
@@ -28,8 +27,11 @@ function SelectField(props) {
           );
         })}
       </select>
-      {props.errors && props.errors[props.name] ? (
-        <p className="fieldError">{props.errors[props.name].message}</p>
+      {props.validation.touched[props.name] &&
+      props.validation.errors[props.name] ? (
+        <FormFeedback type="invalid">
+          {props.validation.errors[props.name]}
+        </FormFeedback>
       ) : null}
     </div>
   );

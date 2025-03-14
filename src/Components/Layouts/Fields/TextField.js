@@ -36,16 +36,6 @@ const TextField = (props) => {
             {props.validation.errors[props.name]}
           </FormFeedback>
         ) : null}
-
-        {props.errorMessage &&
-        props.errorMessage[props.name] &&
-        props.errorMessage[props.name].length > 0 ? (
-          <FormFeedback type="invalid">
-            <div>{props.errorMessage[props.name]}</div>
-          </FormFeedback>
-        ) : (
-          ""
-        )}
       </div>
     </Col>
   );

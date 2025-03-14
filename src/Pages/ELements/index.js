@@ -8,6 +8,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { ToastContainer, toast } from "react-toastify";
 
 import makeApiCall from "../../utils/makeApiCall";
+import { FormFeedback } from "reactstrap";
 
 import { Label } from "reactstrap";
 import RadioField from "../../Components/Layouts/Fields/RadioField";
@@ -144,26 +145,18 @@ function Elements() {
     initialValues: {
       name: element?.name,
       description: element?.description,
-
       payRun: element?.payRun,
-
       classification: element?.classification,
-
       category: element?.category,
-
-      // processingType: element?.processingType || "Open",
-      status: "active",
-      // prorate: element?.prorate || "Yes",
-      effectiveStartDate: element?.effectiveStartDate,
-      effectiveEndDate: element?.effectiveEndDate,
-      selectedMonths: [],
-      // payFrequency: element?.payFrequency || "Monthly",
-      modifiedBy: "Preston A.",
     },
 
-    // validationSchema: Yup.object({
-    //   email: Yup.string().required("Please enter a email"),
-    // }),
+    validationSchema: Yup.object({
+      name: Yup.string().required("Please enter a name"),
+      classification: Yup.string().required("Please select a classification"),
+      payRun: Yup.string().required("Please select a pay run"),
+      category: Yup.string().required("Please select a category"),
+      description: Yup.string().required("Please enter a description"),
+    }),
 
     onSubmit: async (values) => {
       console.log("sisisi");
@@ -483,6 +476,13 @@ function Elements() {
                     validation={validation}
                     onBlur={validation.handleBlur}
                   />
+
+                  {validation.touched["description"] &&
+                  validation.errors["description"] ? (
+                    <FormFeedback type="invalid">
+                      {validation.errors["description"]}
+                    </FormFeedback>
+                  ) : null}
                 </div>
               </div>
 
@@ -492,10 +492,7 @@ function Elements() {
                     Cancel
                   </div>
                 </div>
-                <div
-                  className="form__group"
-                  // onClick={() => handleNextTabPlane(currentTabPlane + 1)}
-                >
+                <div className="form__group">
                   <button type="submit" className="next-button">
                     {validation.isSubmitting
                       ? "please wait"
@@ -503,70 +500,6 @@ function Elements() {
                       ? "Update Element"
                       : "Create Element"}
                   </button>
-                </div>
-
-                {/* <div
-                  className="form__group"
-                  onClick={() => handleNextTabPlane(currentTabPlane + 1)}
-                >
-                  <div className="next-button">Next</div>
-                </div> */}
-              </div>
-            </div>
-
-            <div
-              className={`tabPlane ${currentTabPlane === 2 ? "active" : ""}`}
-            >
-              <div className="row">
-                <div className="form__group">
-                  <Label className="label"> Effective start date</Label>
-
-                  <input
-                    className="select"
-                    name="effectiveStartDate"
-                    type="date"
-                    placeholder="select date"
-                  />
-                </div>
-                <div className="form__group">
-                  <Label className="label"> Effective End date</Label>
-
-                  <input
-                    className="select"
-                    name="effectiveEndDate"
-                    type="date"
-                    placeholder="select date"
-                  />
-                </div>
-              </div>
-
-              <div className="row">
-                <div className="form__group">
-                  <div onClick={() => toggle()} className="cancel-button">
-                    Cancel
-                  </div>
-                </div>
-
-                <div
-                  className="form__group"
-                  // onClick={() => handleNextTabPlane(currentTabPlane + 1)}
-                >
-                  <button type="submit" className="next-button">
-                    {validation.isSubmitting
-                      ? "please wait"
-                      : isUpdate
-                      ? "Update Element"
-                      : "Create Element"}
-                  </button>
-                </div>
-
-                <div className="form__group">
-                  <div
-                    onClick={() => handleNextTabPlane(currentTabPlane - 1)}
-                    className="back-button"
-                  >
-                    {"<"} Go back
-                  </div>
                 </div>
               </div>
             </div>

@@ -382,6 +382,12 @@ input[type="radio"] {
   accent-color: green;
 }
 
+.invalid-feedback {
+  color: red;
+  margin-left: 1rem;
+  transition: all 0.25s;
+}
+
 .loader {
   height: 15px;
   aspect-ratio: 5;

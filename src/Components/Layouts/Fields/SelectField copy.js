@@ -10,19 +10,17 @@ function SelectField(props) {
       <select
         disabled={props.disabled}
         className="select"
-        value={props.value}
         name={props.name}
         onChange={(e) => {
-          console.log(e.target.value, "EVALL");
-          props.validation.setFieldValue(`${props.name}`, e.target.value);
+          console.log(e.target.value);
+          props.validation.setFieldValue(`${props.name}`, e.value);
         }}
         placeholder={props.placeholder}
         multiple={props.isMulti}
-        options={props?.options}
       >
         {props.options.map((item, i) => {
           return (
-            <option key={i} value={item.value}>
+            <option key={i} value={+item.value}>
               {item.label}
             </option>
           );

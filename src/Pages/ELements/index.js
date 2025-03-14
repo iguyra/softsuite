@@ -1,9 +1,11 @@
 import Search from "../../Components/Search";
 import { TableList } from "../../Components/Layouts/TableList";
-
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { useMemo } from "react";
 
 import React, { useEffect, useState, useCallback } from "react";
+import { ToastContainer, toast } from "react-toastify";
 
 import makeApiCall from "../../utils/makeApiCall";
 
@@ -13,65 +15,115 @@ import ToggleField from "../../Components/Layouts/Fields/ToggleField";
 import TextField from "../../Components/Layouts/Fields/TextField";
 import SelectField from "../../Components/Layouts/Fields/SelectField";
 import { useForm } from "react-hook-form";
+import { Divider, Flex, Tag } from "antd";
+import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  ExclamationCircleOutlined,
+  MinusCircleOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
+import { debounce } from "lodash";
+
+import useSWR from "swr";
+
+import DeleteModal from "../../Components/Modules/DeleteModal";
+const elCl = [
+  {
+    label: "Prospect",
+    value: "prospect",
+  },
+  {
+    label: "Lead",
+    value: "Lead",
+  },
+  {
+    label: "VIP Customer",
+    value: "vip customer",
+  },
+];
+
+const elementCategoryOptions = [
+  {
+    label: "Email Campaign",
+    value: "Email Campaign",
+  },
+  {
+    label: " Referral Program",
+    value: " Referral Program",
+  },
+  {
+    label: "Event Participation",
+    value: "Event Participation",
+  },
+];
+
+const elementPayrunOptions = [
+  {
+    label: "Pending",
+    value: "Pending",
+  },
+  {
+    label: "Processing",
+    value: "Processing",
+  },
+  {
+    label: "Approved",
+    value: "Approved",
+  },
+];
+
+const api = new makeApiCall();
+
+const fetcher = async (url) => {
+  const data = await api.get(url);
+
+  return data;
+};
 
 function Elements() {
   const [showModal, setShowModal] = useState(false);
-
   const [isUpdate, setIsUpdate] = useState(false);
   const [element, setElement] = useState({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
-  const [isAdded, setIsAdded] = useState(false);
-  const [isUpdated, setIsUpdated] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [IsError, setIsError] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(false);
+  const [errMsg, setErrorMsg] = useState("");
+
   const [currentTabPlane, setCurrentTabPlane] = useState(1);
-  const [elementsList, setElementList] = useState(1);
-  const [api, setAPI] = useState();
 
-  const [elClassificationOptions, setElClassificationOptions] = useState([]);
-  const [elementCategoryOptions, setElementCategoryOptions] = useState([]);
-  const [isSelectedMonthsFieldDisabled, setIsSelectedMonthsFieldDisabled] =
-    useState(true);
-  const [payRunOptions, setPayRunOptions] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [phonebooks, setElementList] = useState([]);
+  const [isSearching, setIsSearching] = useState("");
 
-  const { register, handleSubmit, formState, setValue, watch } = useForm({
-    defaultValues: {
-      name: element?.name,
-      description: element?.description,
-      payRunId: element?.payRunId,
-      payRunValueId: element?.payRunValueId,
-      classificationId: element?.classificationId,
-      classificationValueId: element?.classificationValueId,
-      categoryId: element?.categoryId,
-      categoryValueId: element?.categoryValueId,
-      reportingName: element?.reportingName,
-      processingType: element?.processingType || "Open",
-      status: "active",
-      prorate: element?.prorate || "Yes",
-      effectiveStartDate: element?.effectiveStartDate,
-      effectiveEndDate: element?.effectiveEndDate,
-      selectedMonths: [],
-      payFrequency: element?.payFrequency || "Monthly",
-      modifiedBy: "Preston A.",
-    },
+  const showDeleteModal = (item) => {
+    setIsModalOpen(true);
+    setElement(item);
+  };
+
+  const url = isSearching ? `element/:term?term=${isSearching}` : `element`;
+
+  let { data, mutate, isValidating } = useSWR(url, fetcher, {
+    keepPreviousData: true,
+    revalidateOnFocus: false, // revalidate when the page gains focus
+    revalidateOnReconnect: false, // revalidate when the browser regains network connectivity
   });
 
-  const watchedClassificationValueId = watch("classificationValueId");
-  const watchedPayFrequency = watch("payFrequency");
-  const watchedPayRunValueId = watch("payRunValueId");
-  const watchedCategoryValueId = watch("categoryValueId");
-  const watchedStatus = watch("status");
+  console.log(data, "ELEMENTSS");
+
+  const handleEdit = (element) => {
+    setIsUpdate(true);
+    setElement(element);
+    Object.keys(element).forEach((key) => {
+      // setValue(key, element[key]);
+    });
+    setShowModal(!showModal);
+  };
+  const handleNextTabPlane = (id) => {
+    setCurrentTabPlane(id);
+  };
 
   const resetFlag = () => {
-    setIsSubmitted(false);
-    setIsError(false);
-    setIsDeleted(false);
     setErrorMsg("");
-    setIsAdded(false);
-    setIsUpdated(false);
     setIsUpdate(false);
     setShowModal(false);
     setElement({});
@@ -79,236 +131,98 @@ function Elements() {
     setCurrentTabPlane(1);
   };
 
-  useEffect(() => {
-    if (isDeleted || isAdded || isUpdated || IsError) {
-      setTimeout(() => {
-        resetFlag();
-      }, 3000);
-    }
-  }, [isDeleted, isAdded, isUpdated, IsError]);
-
-  useEffect(() => {
-    const api = new makeApiCall();
-    setAPI(api);
-  }, []);
-
-  useEffect(() => {
-    if (watchedStatus === false) {
-      setValue("status", "inactive");
-    } else {
-      setValue("status", "active");
-    }
-
-    if (watchedCategoryValueId) {
-      let category = elementCategoryOptions.find(
-        (item) => +item.value === +watchedCategoryValueId
-      );
-
-      if (!category) return;
-
-      setValue("categoryId", +category.lookupId);
-    }
-  }, [watchedCategoryValueId]);
-
-  useEffect(() => {
-    if (!api) return;
-
-    const fetchElements = async () => {
-      setIsLoading(true);
-
-      try {
-        let data = await api.get(`elements`);
-        let elements = data.data.content.filter(
-          (item) => item.modifiedBy === "Preston A."
-        );
-
-        setElementList(elements);
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-      }
-    };
-
-    fetchElements();
-  }, [isDeleted, isAdded, api]);
-
-  useEffect(() => {
-    if (watchedPayFrequency === "Selected Months") {
-      setIsSelectedMonthsFieldDisabled(false);
-    }
-  }, [watchedPayFrequency, watchedStatus]);
-
-  useEffect(() => {
-    if (!api) return;
-
-    let fetchlookupvalues = async () => {
-      let data = await api.get(
-        `lookups/5/lookupvalues/${+watchedPayRunValueId}`
-      );
-
-      setValue("payRunId", +data.lookupId);
-    };
-
-    if (watchedPayRunValueId) {
-      fetchlookupvalues();
-    }
-  }, [watchedPayRunValueId, api]);
-
-  useEffect(() => {
-    if (!api || !watchedClassificationValueId) return;
-
-    let fetchlookupvalues = async () => {
-      let data = await api.get(
-        `lookups/2/lookupvalues/${+watchedClassificationValueId}`
-      );
-
-      let data_2 = await api.get(`lookups/1/lookupvalues`);
-
-      setValue("classificationId", +data.lookupId);
-
-      let lookupName = data.name;
-
-      let categoryOptions = [];
-      if (data.name === "Non-Grossable Earning") {
-        categoryOptions = data_2.filter(
-          (item) => !item.name.includes("Deduction")
-        );
-      } else {
-        categoryOptions = data_2.filter((item) =>
-          item.name.includes(lookupName)
-        );
-      }
-
-      categoryOptions = categoryOptions.map((item) => {
-        return { name: item.name, value: +item.id, ...item };
-      });
-
-      setElementCategoryOptions(categoryOptions);
-    };
-
-    if (watchedClassificationValueId) {
-      fetchlookupvalues();
-    }
-  }, [watchedClassificationValueId, api]);
-
-  useEffect(() => {
-    if (!api) return;
-
-    const fetchlookupvalues = async () => {
-      setIsLoading(true);
-
-      try {
-        let data = await api.get(`lookups/2/lookupvalues`);
-
-        let el_classification = data.map((item) => {
-          return { name: item.name, value: +item.id };
-        });
-
-        setElClassificationOptions(el_classification);
-
-        setIsLoading(false);
-      } catch (err) {
-        handleError();
-        setIsLoading(false);
-      }
-    };
-
-    const fetchPayRunLookUps = async () => {
-      setIsLoading(true);
-
-      try {
-        let data = await api.get(`lookups/5/lookupvalues`);
-
-        let payRunOptions = data.map((item) => {
-          return { name: item.name, value: +item.id };
-        });
-
-        setPayRunOptions(payRunOptions);
-
-        setIsLoading(false);
-      } catch (err) {
-        handleError();
-        setIsLoading(false);
-      }
-    };
-    fetchlookupvalues();
-    fetchPayRunLookUps();
-  }, [isSubmitted, api]);
-
   const toggle = useCallback(() => {
     resetFlag();
 
     setShowModal(!showModal);
   }, [showModal]);
 
-  const handleEdit = (element) => {
-    setIsUpdate(true);
-    setElement(element);
-    Object.keys(element).forEach((key) => {
-      setValue(key, element[key]);
-    });
-    setShowModal(!showModal);
-  };
+  const validation = useFormik({
+    // enableReinitialize : use this flag when initial values needs to be changed
+    enableReinitialize: true,
 
-  const onClickDelete = async (p) => {
-    setElement(p);
-    setIsLoading(true);
-    const api = new makeApiCall();
+    initialValues: {
+      name: element?.name,
+      description: element?.description,
 
-    try {
-      await api.delete(`elements/${p.id}`);
-      setIsDeleted(true);
-      setIsLoading(false);
-    } catch (err) {
-      setIsLoading(false);
-    }
-  };
+      payRun: element?.payRun,
 
-  function handleError(err) {
-    let { message } = err?.response?.data || {};
+      classification: element?.classification,
 
-    setIsLoading(false);
-    setIsSubmitted(false);
-    setIsError(true);
+      category: element?.category,
 
-    setErrorMsg(message || "a server error occured");
-  }
+      // processingType: element?.processingType || "Open",
+      status: "active",
+      // prorate: element?.prorate || "Yes",
+      effectiveStartDate: element?.effectiveStartDate,
+      effectiveEndDate: element?.effectiveEndDate,
+      selectedMonths: [],
+      // payFrequency: element?.payFrequency || "Monthly",
+      modifiedBy: "Preston A.",
+    },
 
-  const handleNextTabPlane = (id) => {
-    setCurrentTabPlane(id);
-  };
+    // validationSchema: Yup.object({
+    //   email: Yup.string().required("Please enter a email"),
+    // }),
 
-  const handleSave = async (values) => {
-    values.categoryId = +values.categoryId;
-    values.categoryValueId = +values.categoryValueId;
-    values.classificationId = +values.classificationId;
-    values.payRunValueId = +values.payRunValueId;
-    values.classificationValueId = +values.classificationValueId;
-    setIsLoading(true);
-
-    if (!isUpdate) {
+    onSubmit: async (values) => {
+      console.log("sisisi");
+      setErrorMsg("");
       try {
-        await api.post(`elements`, values);
+        let data;
+        if (isUpdate) {
+          values._id = element._id;
+          data = await api.put("element/", values);
+        } else {
+          data = await api.post("element/", values);
+        }
+        toast(`🚀 ${data.message}`);
 
-        setIsAdded(true);
-        handleNextTabPlane(currentTabPlane + 1);
-        setIsLoading(false);
-      } catch (err) {
-        console.log(err);
+        setShowModal(false);
+
+        console.log(data, "NEW_METAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA");
+
+        mutate();
+
+        // const access_token = data.access_token;
+      } catch (error) {
+        console.log(error, "LOGIN");
+        let errMsg = error?.response?.data?.message;
+        console.log(errMsg, "ERRRRRRRRRRRR");
+        errMsg = errMsg || "internal server occured";
+        setErrorMsg(errMsg);
+        console.log(errMsg, "ER__MERSG");
       }
-    } else {
-      try {
-        await api.put(`elements/${element.id}`, values);
+    },
+  });
 
-        setIsAdded(true);
-        setIsLoading(false);
+  const search = async (term) => {
+    // setIsLoading(true);
 
-        handleNextTabPlane(currentTabPlane + 1);
-      } catch (err) {
-        setIsLoading(false);
-      }
-    }
+    setIsSearching(term);
+    // let data = await api.get(`element/:term`, {
+    //   params: {
+    //     term,
+    //   },
+    // });
+    mutate(url);
+    // setElementList(data.phonebook);
+    // setIsLoading(false);
   };
+  const handler = useCallback(
+    debounce((term) => {
+      if (term) search(term);
+      else search();
+    }, 500),
+    []
+  );
+
+  const handleSearch = (e) => {
+    let term = e.target.value;
+    handler(term);
+  };
+
+  console.log(phonebooks, "SEARCGGGG");
 
   // Column
   const columns = useMemo(
@@ -321,20 +235,38 @@ function Elements() {
 
       {
         Header: "Element Classification",
-        accessor: "classificationValueId",
+        accessor: "classification",
         filterable: false,
       },
 
       {
         Header: "Element Category",
-        accessor: "categoryValueId",
+        accessor: "category",
       },
       {
-        Header: "Status",
-        accessor: "status",
+        Header: "Pay Run",
+        Cell: (cellProps) => {
+          let payRun = cellProps.row.original.payRun;
+
+          return (
+            <React.Fragment>
+              <div>
+                {payRun === "Approved" ? (
+                  <Tag color="success">{payRun}</Tag>
+                ) : payRun === "Processing" ? (
+                  <Tag icon={<SyncOutlined spin />} color="processing">
+                    {payRun}
+                  </Tag>
+                ) : (
+                  <Tag color="warning">{payRun}</Tag>
+                )}
+              </div>
+            </React.Fragment>
+          );
+        },
       },
       {
-        Header: "Date & Time Modified",
+        Header: "Date & Time Created",
 
         Cell: (cellProps) => {
           let date = cellProps.row.original.createdAt.split("T")[0];
@@ -349,10 +281,25 @@ function Elements() {
           );
         },
       },
+
       {
-        Header: "Modified By",
-        accessor: "modifiedBy",
+        Header: "Description",
+
+        Cell: (cellProps) => {
+          let description = cellProps.row.original.description;
+
+          return (
+            <React.Fragment>
+              <div>
+                {description.length > 25
+                  ? description?.slice(0, 25) + "..."
+                  : description}
+              </div>
+            </React.Fragment>
+          );
+        },
       },
+
       {
         Header: "Actions",
         Cell: (cellProps) => {
@@ -372,7 +319,8 @@ function Elements() {
                 <img
                   onClick={() => {
                     const data = cellProps.row.original;
-                    onClickDelete(data);
+                    // onClickDelete(data);
+                    showDeleteModal(data);
                   }}
                   src="/delete.png"
                   alt=""
@@ -387,6 +335,9 @@ function Elements() {
     []
   );
 
+  console.log(validation.values, "VALUEESS");
+  console.log(validation.errors, "VALUES__EROORR");
+
   return (
     <div className="elementspage">
       <div className="elementspage__container">
@@ -394,7 +345,16 @@ function Elements() {
 
         <div className="cardtableheader">
           <div className="cardtableheader__container">
-            <Search />
+            <div className="search">
+              <input
+                onChange={handleSearch}
+                type="text"
+                placeholder="search for by name..."
+              />
+              <div className="search__button">
+                <img src="/search-button.png" alt="" />
+              </div>
+            </div>
             <img src="/filter.png" alt="" />
           </div>
 
@@ -404,18 +364,25 @@ function Elements() {
           </div>
         </div>
 
-        {elementsList.length > 0 ? (
-          <TableList
-            columns={columns}
-            data={elementsList}
-            isGlobalFilter={false}
-            isAddUserList={false}
-            customFetchData={() => 0}
-            customTotalSize={4}
-            customPageSize={4}
-            theadClass="table-light"
-          />
-        ) : (
+        <TableList
+          columns={columns}
+          data={data?.elements || []}
+          isGlobalFilter={false}
+          isAddUserList={false}
+          customFetchData={() => 0}
+          customTotalSize={4}
+          customPageSize={4}
+          theadClass="table-light"
+        />
+
+        {isValidating && (
+          <div className="emptypagecard">
+            {" "}
+            <div class="loader"></div>
+          </div>
+        )}
+
+        {!isValidating && !data?.elements && (
           <div className="emptypagecard">
             <img src="/empty.png" alt="" />
 
@@ -425,7 +392,10 @@ function Elements() {
             </div>
           </div>
         )}
-        <p className="isLoading">{isLoading ? "Please wait" : ""}</p>
+
+        <p className="isLoading">
+          {validation.isSubmitting ? "Please wait" : ""}
+        </p>
       </div>
 
       <div
@@ -438,7 +408,12 @@ function Elements() {
             <h4>{isUpdate ? "Update" : "Create"} Element</h4>
           </div>
 
-          <form onSubmit={handleSubmit(handleSave)}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              validation.handleSubmit();
+            }}
+          >
             <div
               className={`tabPlane ${currentTabPlane === 1 ? "active" : ""}`}
             >
@@ -447,22 +422,22 @@ function Elements() {
                   name="name"
                   label="Name"
                   placeholder="input name"
-                  register={register("name", {
-                    required: "Please input a name",
-                  })}
-                  errors={formState.errors}
+                  value={validation.values.name || ""}
+                  onChange={validation.handleChange}
+                  validation={validation}
+                  onBlur={validation.handleBlur}
                 />
 
                 <SelectField
                   className="select"
-                  name="classificationValueId"
+                  name="classification"
                   label="Element Classification"
                   placeholder="select a classification..."
-                  register={register("classificationValueId", {
-                    required: "Please select a Classification",
-                  })}
-                  options={elClassificationOptions}
-                  errors={formState.errors}
+                  options={elCl}
+                  value={validation.values.classification || ""}
+                  onChange={validation.handleChange}
+                  validation={validation}
+                  onBlur={validation.handleBlur}
                 />
               </div>
 
@@ -470,25 +445,25 @@ function Elements() {
                 <SelectField
                   className="select"
                   label="Element Category"
-                  name="categoryValueId"
+                  name="category"
                   options={elementCategoryOptions}
                   placeholder="select Element category..."
-                  register={register("categoryValueId", {
-                    required: "Please select a category",
-                  })}
-                  errors={formState.errors}
+                  value={validation.values.category || ""}
+                  onChange={validation.handleChange}
+                  validation={validation}
+                  onBlur={validation.handleBlur}
                 />
 
                 <SelectField
                   className="select"
-                  name="payRunValueId"
-                  options={payRunOptions}
+                  name="payRun"
+                  options={elementPayrunOptions}
                   placeholder="select Payrun..."
                   label="Element payrun"
-                  register={register("payRunValueId", {
-                    required: "Please select a payrun",
-                  })}
-                  errors={formState.errors}
+                  value={validation.values.payRun || ""}
+                  onChange={validation.handleChange}
+                  validation={validation}
+                  onBlur={validation.handleBlur}
                 />
               </div>
 
@@ -503,41 +478,14 @@ function Elements() {
                     options={[{ label: "one", value: "1", name: "e" }]}
                     placeholder="Input Description"
                     id="description-input"
-                    {...register("description", {
-                      required: "Please input a description",
-                      minLength: 2,
-                    })}
+                    value={validation.values.description || ""}
+                    onChange={validation.handleChange}
+                    validation={validation}
+                    onBlur={validation.handleBlur}
                   />
-                  {formState.errors && formState.errors.description ? (
-                    <p className="fieldError">
-                      {formState.errors.description.message}
-                    </p>
-                  ) : null}
                 </div>
               </div>
-              <div className="row no-grid">
-                <div className="form__group">
-                  <Label className="label">Reporting Name</Label>
 
-                  <textarea
-                    className="select"
-                    style={{ width: "100%", height: "10rem" }}
-                    name="reporting"
-                    options={[{ label: "one", value: "1", name: "e" }]}
-                    placeholder="Input Reporting Name"
-                    id="Reporting-input"
-                    {...register("reportingName", {
-                      minLength: 2,
-                      required: "PLease input a reporting name",
-                    })}
-                  />
-                  {formState.errors && formState.errors.reportingName ? (
-                    <p className="fieldError">
-                      {formState.errors.reportingName.message}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
               <div className="row">
                 <div className="form__group">
                   <div onClick={() => toggle()} className="cancel-button">
@@ -546,10 +494,23 @@ function Elements() {
                 </div>
                 <div
                   className="form__group"
+                  // onClick={() => handleNextTabPlane(currentTabPlane + 1)}
+                >
+                  <button type="submit" className="next-button">
+                    {validation.isSubmitting
+                      ? "please wait"
+                      : isUpdate
+                      ? "Update Element"
+                      : "Create Element"}
+                  </button>
+                </div>
+
+                {/* <div
+                  className="form__group"
                   onClick={() => handleNextTabPlane(currentTabPlane + 1)}
                 >
                   <div className="next-button">Next</div>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -565,16 +526,7 @@ function Elements() {
                     name="effectiveStartDate"
                     type="date"
                     placeholder="select date"
-                    {...register("effectiveStartDate", {
-                      required: "Please select an Effective start date",
-                    })}
                   />
-
-                  {formState.errors.effectiveStartDate ? (
-                    <p className="fieldError">
-                      {formState.errors.effectiveStartDate.message}
-                    </p>
-                  ) : null}
                 </div>
                 <div className="form__group">
                   <Label className="label"> Effective End date</Label>
@@ -584,80 +536,8 @@ function Elements() {
                     name="effectiveEndDate"
                     type="date"
                     placeholder="select date"
-                    {...register("effectiveEndDate", {
-                      required: "Please select an Effective End date",
-                    })}
                   />
-                  {formState.errors.effectiveEndDate ? (
-                    <p className="fieldError">
-                      {formState.errors.effectiveEndDate.message}
-                    </p>
-                  ) : null}
                 </div>
-              </div>
-
-              <div className="row">
-                <RadioField
-                  label="Proccessing Type"
-                  firstRadioName="Open"
-                  secondRadioName="Closed"
-                  name="processingType"
-                  register={register("processingType")}
-                  errors={formState.errors}
-                />
-
-                <RadioField
-                  label="Pay Frequency"
-                  firstRadioName="Monthly"
-                  secondRadioName="Selected Months"
-                  register={register("payFrequency")}
-                  name="payFrequency"
-                  errors={formState.errors}
-                />
-              </div>
-              <div className="row no-grid">
-                <SelectField
-                  className="select"
-                  label="Selected Pay Months"
-                  disabled={isSelectedMonthsFieldDisabled}
-                  options={[
-                    { name: "January", value: "January" },
-                    { name: "February", value: "February" },
-                    { name: "March", value: "March" },
-                    { name: "April", value: "April" },
-                    { name: "May", value: "May" },
-                    { name: "June", value: "June" },
-                    { name: "July", value: "July" },
-                    { name: "August", value: "August" },
-                    { name: "September", value: "September" },
-                    { name: "October", value: "October" },
-                    { name: "November", value: "November" },
-                    { name: "December", value: "December" },
-                  ]}
-                  name="selectedMonths"
-                  placeholder="Select"
-                  {...register("selectedMonths", { minLength: 2 })}
-                  isMulti={true}
-                />
-              </div>
-
-              <div className="row">
-                <RadioField
-                  label="Prorate"
-                  firstRadioName="Yes"
-                  secondRadioName="No"
-                  register={register("prorate")}
-                  name="prorate"
-                  errors={formState.errors}
-                />
-
-                <ToggleField
-                  label="Prorate"
-                  firstRadioName="Yes"
-                  secondRadioName="No"
-                  register={register("status")}
-                  name="status"
-                />
               </div>
 
               <div className="row">
@@ -671,12 +551,8 @@ function Elements() {
                   className="form__group"
                   // onClick={() => handleNextTabPlane(currentTabPlane + 1)}
                 >
-                  <button
-                    type="submit"
-                    className="next-button"
-                    disabled={isLoading}
-                  >
-                    {isLoading
+                  <button type="submit" className="next-button">
+                    {validation.isSubmitting
                       ? "please wait"
                       : isUpdate
                       ? "Update Element"
@@ -707,6 +583,7 @@ function Elements() {
                 <button
                   onClick={() => setShowModal(false)}
                   className="next-button"
+                  type="button"
                 >
                   Close to continue
                 </button>
@@ -715,6 +592,16 @@ function Elements() {
           </form>
         </div>
       </div>
+      <div>
+        <ToastContainer />
+      </div>
+
+      <DeleteModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        item={element}
+        mutate={mutate}
+      />
     </div>
   );
 }

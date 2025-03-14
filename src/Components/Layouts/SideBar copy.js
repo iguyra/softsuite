@@ -3,12 +3,6 @@ import Switch from "../Modules/Switch";
 
 const sidebarData = [
   {
-    id: "dashboard",
-    label: "Dashboard",
-    icon: "/dash.png",
-    link: "/salary",
-  },
-  {
     id: "payroll",
     label: "Payroll Activites",
     icon: "/activity.png",
@@ -22,52 +16,52 @@ const sidebarData = [
     // },
     parentId: "payroll",
     // stateVariables: ispayroll,
-    // subItems: [
-    //   {
-    //     id: 4,
-    //     label: "Payroll Run",
-    //     icon: "las la-list",
-    //     link: "/payroll-list",
-    //     parentid: "payroll",
-    //   },
+    subItems: [
+      {
+        id: 4,
+        label: "Payroll Run",
+        icon: "las la-list",
+        link: "/payroll-list",
+        parentid: "payroll",
+      },
 
-    //   {
-    //     id: 1,
-    //     label: "Payroll Reversal",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll History",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll Lock",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll Payslip",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll Log",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll Aproval",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    // ],
+      {
+        id: 1,
+        label: "Payroll Reversal",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll History",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll Lock",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll Payslip",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll Log",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll Aproval",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+    ],
   },
 
   {
@@ -86,22 +80,22 @@ const sidebarData = [
 
     parentId: "payroll",
     // stateVariables: ispayroll,
-    // subItems: [
-    //   {
-    //     id: 4,
-    //     label: "Elements",
-    //     icon: "las la-list",
-    //     link: "/payroll-list",
-    //     parentid: "payroll",
-    //   },
+    subItems: [
+      {
+        id: 4,
+        label: "Elements",
+        icon: "las la-list",
+        link: "/payroll-list",
+        parentid: "payroll",
+      },
 
-    //   {
-    //     id: 1,
-    //     label: "Balances",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    // ],
+      {
+        id: 1,
+        label: "Balances",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+    ],
   },
 
   {
@@ -121,52 +115,52 @@ const sidebarData = [
 
     parentId: "payroll",
     // stateVariables: ispayroll,
-    // subItems: [
-    //   {
-    //     id: 4,
-    //     label: "Payroll Run",
-    //     icon: "las la-list",
-    //     link: "/payroll-list",
-    //     parentid: "payroll",
-    //   },
+    subItems: [
+      {
+        id: 4,
+        label: "Payroll Run",
+        icon: "las la-list",
+        link: "/payroll-list",
+        parentid: "payroll",
+      },
 
-    //   {
-    //     id: 1,
-    //     label: "Payroll Reversal",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll History",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll Lock",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll Payslip",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll Log",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    //   {
-    //     id: 1,
-    //     label: "Payroll Aproval",
-    //     link: "/payroll-new",
-    //     parentid: "payroll",
-    //   },
-    // ],
+      {
+        id: 1,
+        label: "Payroll Reversal",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll History",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll Lock",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll Payslip",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll Log",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+      {
+        id: 1,
+        label: "Payroll Aproval",
+        link: "/payroll-new",
+        parentid: "payroll",
+      },
+    ],
   },
 
   {
@@ -204,13 +198,13 @@ function SideBar() {
         iconPath={"/switch.png"}
       />
 
-      {/* <ul className="sidebar__list">
+      <ul className="sidebar__list">
         <div className="sidebar__item">
           <img src="/dash.png" alt="" />
 
           <p>Dashboard</p>
         </div>
-      </ul> */}
+      </ul>
 
       <ul className="sidebar__list">
         {sidebarData.map((item, i) => {
@@ -228,17 +222,11 @@ function SideBar() {
 
                   <p onClick={() => handleNavClick(item)}>{item.label}</p>
 
-                  {/* {item?.subItems && item.id === activeMenuId ? (
+                  {item.id === activeMenuId ? (
                     <img src="/arrow-down.png" alt="" />
                   ) : (
                     <img src="/Iconly.png" alt="" />
-                  )} */}
-
-                  {/* {item.id === activeMenuId ? (
-                    <img src="/arrow-down.png" alt="" />
-                  ) : (
-                    <img src="/Iconly.png" alt="" />
-                  )} */}
+                  )}
                 </div>
               ) : (
                 <div

@@ -7,7 +7,7 @@ function UserDetails() {
         <img src="/user.png" alt="" />
 
         <div className="">
-          <p>Henry Okoro</p>
+          <p>Guyra A.</p>
           <span>Payrol manger</span>
         </div>
       </div>

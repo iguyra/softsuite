@@ -366,7 +366,7 @@ function Elements() {
           isAddUserList={false}
           customFetchData={() => 0}
           customTotalSize={data?.totalCount}
-          customPageSize={4}
+          customPageSize={5}
           theadClass="table-light"
           pagination
         />

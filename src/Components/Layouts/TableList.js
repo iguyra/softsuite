@@ -129,7 +129,7 @@ export const TableList = ({
     console.log(newPageNumber, "NEW__PAGE_NUMBER2222");
 
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set("offset", 2 * newPageNumber);
+    newSearchParams.set("offset", 5 * newPageNumber);
     newSearchParams.set("limit", 5);
 
     // Replace the current URL with the updated query parameters

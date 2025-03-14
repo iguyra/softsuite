@@ -18,6 +18,7 @@ import { SyncOutlined } from "@ant-design/icons";
 import { debounce } from "lodash";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 import useSWR from "swr";
 
@@ -204,6 +205,9 @@ function Elements() {
     // setElementList(data.phonebook);
     // setIsLoading(false);
   };
+
+  const navigate = useNavigate();
+
   const handler = useCallback(
     debounce((term) => {
       if (term) search(term);
@@ -213,6 +217,8 @@ function Elements() {
   );
 
   const handleSearch = (e) => {
+    navigate({ search: "" });
+
     let term = e.target.value;
     handler(term);
   };

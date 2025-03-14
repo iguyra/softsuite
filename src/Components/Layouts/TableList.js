@@ -130,7 +130,7 @@ export const TableList = ({
 
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set("offset", 5 * newPageNumber);
-    newSearchParams.set("limit", 5);
+    // newSearchParams.set("limit", 5);
 
     // Replace the current URL with the updated query parameters
     // history.replace({ search: newSearchParams.toString() });
